@@ -65,7 +65,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>C:\ProgramData\TL-Engine\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <MinimalRebuild>false</MinimalRebuild>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -87,12 +87,12 @@
       <ImageHasSafeExceptionHandlers>false</ImageHasSafeExceptionHandlers>
       <AdditionalDependencies>TL-Engine2019Debug.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
+    <!--<PostBuildEvent>
       <Message>Copying DLLs &amp; shaders...</Message>
       <Command>copy "C:\ProgramData\TL-Engine\3rd Party\Irrlicht-0.7\bin\VisualStudio\IrrlichtDebug.dll" "$(OutDir)" &gt; NUL
 copy "C:\ProgramData\TL-Engine\3rd Party\TL-Xtreme\shader\*.*" "$(OutDir)" &gt; NUL
 </Command>
-    </PostBuildEvent>
+    </PostBuildEvent>-->
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -117,18 +117,44 @@ copy "C:\ProgramData\TL-Engine\3rd Party\TL-Xtreme\shader\*.*" "$(OutDir)" &gt; 
       <SubSystem>Console</SubSystem>
       <AdditionalDependencies>TL-Engine2019.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <PostBuildEvent>
+    <!--<PostBuildEvent>
       <Message>Copying DLLs &amp; shaders...</Message>
       <Command>copy "C:\ProgramData\TL-Engine\3rd Party\Irrlicht-0.7\bin\VisualStudio\Irrlicht.dll" "$(OutDir)" &gt; NUL
 copy "C:\ProgramData\TL-Engine\3rd Party\TL-Xtreme\shader\*.*" "$(OutDir)" &gt; NUL
 </Command>
-    </PostBuildEvent>
+       </PostBuildEvent>-->
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ai.cpp" />
+    <ClCompile Include="camera.cpp" />
+    <ClCompile Include="ui.cpp" />
+    <ClCompile Include="racecar.cpp" />
+    <ClCompile Include="checkpoint.cpp" />
+    <ClCompile Include="collision.cpp" />
+    <ClCompile Include="node.cpp" />
     <ClCompile Include="DesertRacer.cpp" />
+    <ClCompile Include="files.cpp" />
+    <ClCompile Include="racetrack.cpp" />
+    <ClCompile Include="startup.cpp" />
+    <ClCompile Include="scenery.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="ReadMe.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ai.h" />
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="ui.h" />
+    <ClInclude Include="racecar.h" />
+    <ClInclude Include="checkpoint.h" />
+    <ClInclude Include="collision.h" />
+    <ClInclude Include="startup.h" />
+    <ClInclude Include="vector.h" />
+    <ClInclude Include="keybinds.h" />
+    <ClInclude Include="node.h" />
+    <ClInclude Include="files.h" />
+    <ClInclude Include="racetrack.h" />
+    <ClInclude Include="scenery.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
