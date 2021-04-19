@@ -1,6 +1,11 @@
-// VERTEX SHADER
-// DiffuseTex.vsh
-// PASSES DATA ON TO PIXEL SHADER @ ColTex.psh, probably
+/**
+ * @file DiffuseTex.psh
+ * Desert Racer vertex shader
+ *
+ * @author Laurent Noel, Probably
+ * @author Jacob Sanchez Perez (G20812080) <jsanchez-perez@uclan.ac.uk>
+ * Games Concepts (CO1301), University of Central Lancashire
+ */
 
 //-----------------------------------------------------------------------------
 // Global variables
@@ -48,16 +53,16 @@ void main( in VS_Input i, out VS_Output o )
 	// Probably changes position of light source + intensity
 	const float3 DirToLight = { 0.408f, 0.408f, -0.816 };
 	
-	const float3 Minimum = { 0.1f, 0.1f, 0.1f };
+	// The lower the brighter
 	const float SpecularPower = 30.0f;
 	
     // Transform model vertex position to world space, then to viewport space, then output it
 	float4 newPosition = float4(i.Position, 1.0f);
     float3 WorldPosition = mul( newPosition, WorldMatrix );
-	//WorldPosition.y += sin(i.TexCoord0.x /6) * 2;
+
     o.Position = mul( float4(WorldPosition, 1.0f), ViewProjMatrix );
 
-	// Calculate normal (some important thing)
+	// Calculate normal (?)
 	float3 Normal = normalize( mul( float4(i.Normal, 0.0f), WorldMatrix ) ).xyz;
 
 	// Usually calculates diffuse colour
@@ -65,7 +70,6 @@ void main( in VS_Input i, out VS_Output o )
 
 	float3 DirToCamera = normalize( CameraPosition - WorldPosition );
 	float3 H = normalize( DirToCamera + DirToLight );
-	// Replace diffuse colour with specular
 	float3 SpecularColour = LightColour * pow( saturate( dot(Normal, H) ), SpecularPower ); // Phong
 	
 	o.DiffuseColour = DiffuseColour;

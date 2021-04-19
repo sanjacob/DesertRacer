@@ -1,3 +1,12 @@
+/**
+ * @file ColTex.psh
+ * Desert Racer pixel shader
+ *
+ * @author Laurent Noel, Probably
+ * @author Jacob Sanchez Perez (G20812080) <jsanchez-perez@uclan.ac.uk>
+ * Games Concepts (CO1301), University of Central Lancashire
+ */
+
 //-----------------------------------------------------------------------------
 // Global variables
 //-----------------------------------------------------------------------------
@@ -8,9 +17,13 @@ sampler2D Tex0;
 // Input to Pixel Shader
 struct PS_Input
 {
+	// Diffuse Colour
 	float3 Colour1 : COLOR0;
+	// Specular Colour (Shiny)
 	float3 Colour2 : COLOR1;
+	// Coordinates of Texture
 	float2 TexCoord0 : TEXCOORD0;
+	// Position in world (?)
 	float4 Position : POSITION;
 };
 
@@ -23,5 +36,28 @@ struct PS_Output
 // Main pixel shader function
 void main( in PS_Input i, out PS_Output o ) 
 {
+	// Multiply texture contents by diffuse and specular colours and add them together
 	o.Colour = float4( i.Colour1, 1.0f ) * tex2D( Tex0, i.TexCoord0 ) + float4( i.Colour2, 1.0f ) * tex2D(Tex0, i.TexCoord0);
+
+	// Cel-shading
+	// float precision = 20;
+	// o.Colour = round((float4(i.Colour1, 1.0f) * tex2D(Tex0, i.TexCoord0)) * precision) / precision;
+
+	// Disco Time
+	// float iColour = float4(i.Colour1, 1.0f) * tex2D(Tex0, i.TexCoord0);
+	// float sinX = sin(i.TexCoord0.x * 100);
+	// float sinY = sin(i.TexCoord0.y * 100);
+	// o.Colour = iColour * sinX * sinY;
+
+	// Greyscale
+	// float4 realColour = float4(i.Colour1, 1.0f) * tex2D(Tex0, i.TexCoord0);
+	// float greyScale = (realColour.r + realColour.g + realColour.b) / 3.0f;
+	// o.Colour = float4(greyScale, greyScale, greyScale, realColour.a);
+
+	// B/W
+	// float brightness = 2;
+	// float4 realColour = float4(i.Colour1, 1.0f) * tex2D(Tex0, i.TexCoord0) * brightness;
+
+	// float bw = round((realColour.r + realColour.g + realColour.b) / 3.0f);
+	// o.Colour = float4(bw, bw, bw, realColour.a);
 }
