@@ -85,7 +85,7 @@ DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 			povCam->AttachToParent(model);
 
 			DesertCamera followDesertCam = DesertCamera(followCam, Key_1, true, kDefaultCameraBind);
-			DesertCamera povDesertCam = DesertCamera(followCam, Key_2);
+			DesertCamera povDesertCam = DesertCamera(povCam, Key_2);
 
 			followDesertCam.moveLocallyByVector(kFollowCamPosition);
 			followDesertCam.rotateLocallyByVector(kFollowCamRotation);
@@ -140,7 +140,7 @@ void DesertRacetrack::handleModel(IModel* model, string type, NodeAlignment alig
 	if (type == "race2")
 	{
 		mAI.push_back(HoverAI(model));
-		mAI.back().Goto(mWaypoints.front());
+		mAI.back().follow(mWaypoints.front());
 	}
 	// Model is a checkpoint
 	else if (type == "Checkpoint")
@@ -326,7 +326,7 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 	for (HoverAI& hoverAI : mAI)
 	{
 		// If AI has reached its current target
-		if (hoverAI.move(kGameSpeed, kDeltaTime))
+		if (hoverAI.updateScene(kGameSpeed, kDeltaTime))
 		{
 			// Calculate next waypoint
 			unsigned int nextWaypointI = hoverAI.getWaypointIndex();
@@ -334,7 +334,7 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 			if (mWaypoints.size() > nextWaypointI)
 			{
 				// Set AI's next target
-				hoverAI.Goto(mWaypoints[nextWaypointI]);
+				hoverAI.follow(mWaypoints[nextWaypointI]);
 			}
 			// AI has reached the last waypoint
 			else
@@ -414,7 +414,7 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 		// Recalculate route after collision
 		if (hoverAI.hasCollided())
 		{
-			hoverAI.recalculate(mWaypoints[hoverAI.getWaypointIndex() - 1]);
+			hoverAI.follow(mWaypoints[hoverAI.getWaypointIndex() - 1], false);
 		}
 	}
 

@@ -12,6 +12,8 @@
 #include <cmath> // sqrt
 #include <string> // Output vector as string (mainly for debugging)
 
+#include <iostream>
+
 
 namespace desert
 {
@@ -34,7 +36,7 @@ namespace desert
 		float y = 0;
 		float z = 0;
 
-		SVector3D();
+		SVector3D() {};
 		SVector3D(float xComp, float yComp, float zComp) : x(xComp), y(yComp), z(zComp) {};
 		
 		// Vector negation
@@ -179,7 +181,7 @@ namespace desert
 		float x = 0;
 		float y = 0;
 
-		SVector2D();
+		SVector2D() {};
 		SVector2D(float xComp, float yComp) : x(xComp), y(yComp) {};
 
 		// Vector negation

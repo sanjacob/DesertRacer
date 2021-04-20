@@ -119,7 +119,7 @@ namespace desert
         * @param myEngine Pointer to TL-Engine running instance
         */
         GameUI(tle::I3DEngine* myEngine);
-        // UI deconstructor
+        // UI destructor
         GameUI::~GameUI();
         /**
         * @param text Text to appear in the main dialog

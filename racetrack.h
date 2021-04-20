@@ -63,7 +63,7 @@ namespace desert
         void resetDialog();
 
         // Camera getter
-        ICamera* getCamera();
+        tle::ICamera* getCamera();
 
         // Returns number of checkpoints loaded (or stages per lap)
         int getStagesNumber() const;

@@ -8,6 +8,7 @@
 
 #include <TL-Engine.h>
 #include "vector.h"
+#include "collision.h"
 #include "node.h"
 
 using namespace tle;
@@ -15,8 +16,8 @@ using namespace desert;
 
 
 SceneNodeContainer::SceneNodeContainer(ISceneNode* sceneNode) :
-	node(sceneNode), kInitialPosition({ node->GetX(), node->GetY(), node->GetZ() }),
-	kInitialLocalPosition({ node->GetLocalX(), node->GetLocalY(), node->GetLocalZ() })
+	node(sceneNode), kInitialPosition({ sceneNode->GetX(), sceneNode->GetY(), sceneNode->GetZ() }),
+	kInitialLocalPosition({ sceneNode->GetLocalX(), sceneNode->GetLocalY(), sceneNode->GetLocalZ() })
 {
 }
 
@@ -120,3 +121,40 @@ NodeAlignment SceneNodeContainer::getAlignmentFromRotation(int rotation)
 }
 
 CollisionModel::CollisionModel(IModel* m) : SceneNodeContainer(m) {}
+CollisionModel::~CollisionModel()
+{
+	cout << "Collision Model destroyed" << endl;
+}
+
+SphereCollisionModel::SphereCollisionModel(IModel* m) : CollisionModel(m) {}
+
+bool SphereCollisionModel::collision(SVector2D position, const float collisionRadius)
+{
+	return Collision::circleToCircle(position, position2D(), collisionRadius, mRadius);
+}
+
+bool SphereCollisionModel::collision(SphereCollisionModel other)
+{
+	return Collision::circleToCircle(other.position2D(), position2D(), other.getCollisionRadius(), mRadius);
+}
+
+int SphereCollisionModel::getCollisionRadius()
+{
+	return mRadius;
+}
+
+BoxCollisionModel::BoxCollisionModel(IModel* m, NodeAlignment a) : CollisionModel(m), mAlignment(a) {}
+
+bool BoxCollisionModel::collision(SVector2D position, const float collisionRadius)
+{
+	if (mAlignment == zAligned)
+		return Collision::circleToBox(position, collisionRadius, position2D(), mHalfLength, mHalfWidth);
+	return Collision::circleToBox(position, collisionRadius, position2D(), mHalfWidth, mHalfLength);
+}
+
+bool BoxCollisionModel::collision(SphereCollisionModel other)
+{
+	if (mAlignment == zAligned)
+		return Collision::circleToBox(other.position2D(), other.getCollisionRadius(), position2D(), mHalfLength, mHalfWidth);
+	return Collision::circleToBox(other.position2D(), other.getCollisionRadius(), position2D(), mHalfWidth, mHalfLength);
+}

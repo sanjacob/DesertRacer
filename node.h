@@ -86,12 +86,35 @@ namespace desert
 	{
 	public:
 		CollisionModel(tle::IModel* m);
+		~CollisionModel();
 		/**
 		* Checks if node of container has collided with a different node
 		* @param position Vector containing position of other node
 		* @param collisionRadius Optional parameter for cases in which sphere collision is implemented
 		*/
 		virtual bool collision(SVector2D position, const float collisionRadius = 0.0f) = 0;
+	};
+
+	class SphereCollisionModel : public CollisionModel
+	{
+	public:
+		SphereCollisionModel(tle::IModel* m);
+		virtual bool collision(SVector2D position, const float collisionRadius = 0.0f);
+		virtual bool collision(SphereCollisionModel other);
+		virtual int getCollisionRadius();
+	protected:
+		int mRadius;
+	};
+
+	class BoxCollisionModel : public CollisionModel
+	{
+	public:
+		BoxCollisionModel(tle::IModel* m, NodeAlignment a);
+		virtual bool collision(SVector2D position, const float collisionRadius = 0.0f);
+		virtual bool collision(SphereCollisionModel other);
+	protected:
+		float mHalfWidth, mHalfLength;
+		const NodeAlignment mAlignment;
 	};
 
 	// Interface for vector based movement

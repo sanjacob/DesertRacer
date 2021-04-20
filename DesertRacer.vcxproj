@@ -156,6 +156,10 @@ copy "C:\ProgramData\TL-Engine\3rd Party\TL-Xtreme\shader\*.*" "$(OutDir)" &gt; 
     <ClInclude Include="racetrack.h" />
     <ClInclude Include="scenery.h" />
   </ItemGroup>
+  <!--<ItemGroup>
+    <FxCompile Include="ColTex.psh" />
+    <FxCompile Include="DiffuseTex.vsh" />
+  </ItemGroup>-->
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
