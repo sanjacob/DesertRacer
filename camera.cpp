@@ -18,9 +18,14 @@ using namespace desert;
 
 
 DesertCamera::DesertCamera(ICamera* cam, EKeyCode switchToKey = Key_0, const bool controlEnabled, const SCameraKeybinding camKeybinding) : 
-	SceneNodeContainer(cam), mSwitchToKey(switchToKey), mControllable(controlEnabled), mKeybind(camKeybinding)
+	SceneNodeContainer(cam), camera(cam), mSwitchToKey(switchToKey), mControllable(controlEnabled), mKeybind(camKeybinding)
 {
 	cout << "Camera created" << endl;
+}
+
+ICamera* DesertCamera::getCamera()
+{
+	return camera;
 }
 
 void DesertCamera::control(I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime)

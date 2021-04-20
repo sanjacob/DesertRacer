@@ -31,6 +31,8 @@ namespace desert
         * @param camKeybinding If control is enabled, these keybind will be used
         */
         DesertCamera(tle::ICamera* cam, tle::EKeyCode switchToKey, const bool controlEnabled = false, const SCameraKeybinding camKeybinding = kDefaultCameraBind);
+        // Returns ICamera pointer
+        tle::ICamera* getCamera();
         /**
         * Handle user input in the current frame
         * @param myEngine TL-Engine running instance
@@ -52,6 +54,12 @@ namespace desert
         // Movement and rotation speeds, respectively
         const float kCamSpeed = 40.0f, kRotationSpeed = 0.2f;
         const float kXRotationLimit = 20, kYRotationLimit = 40;
+        
+        // We still need a camera pointer lol
+        // Unless there's some way to cast a SceneNode to Camera
+
+        // Pointer to camera
+        tle::ICamera* camera;
 
         // Camera movement / rotation controls
         SCameraKeybinding mKeybind;
