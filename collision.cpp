@@ -44,11 +44,6 @@ bool Collision::sphereToSphere(SVector3D a, SVector3D b, const float radiusA, co
 
 bool Collision::pointToBox(SVector2D point, const float x1, const float x2, const float y1, const float y2)
 {
-	bool obssede = ((point.x >= x1 && point.x <= x2) && (point.y >= y1 && point.y <= y2));
-	if (obssede) {
-		cout << "x1: " << x1 << " x2: " << x2 << endl;
-		cout << "y1: " << y1 << " y2: " << y2 << endl;
-	}
 	return ((point.x >= x1 && point.x <= x2) && (point.y >= y1 && point.y <= y2));
 }
 
