@@ -30,6 +30,8 @@ namespace desert
             RecentlyCrossed
         };
 
+        static const std::string kDefaultModelName;
+
         /**
         * @param checkpointModel IModel pointer of checkpoint
         * @param alignment Model axis alignment type
@@ -41,7 +43,7 @@ namespace desert
         * @param position 2D vector of the other object
         * @param collisionRadius the collision radius of the other object
         */
-        bool collision(SVector2D position, const float collisionRadius = 0.0f);
+        Collision::CollisionAxis collision(SVector2D position, const float collisionRadius = 0.0f, bool saveAxis = false);
         /**
         * Test collision with checkpoint box to see if it has been crossed
         * @param position of hover car

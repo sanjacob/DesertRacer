@@ -17,15 +17,21 @@ namespace desert
     class Collision
     {
     public:
-        static bool circleToCircle(SVector2D a, SVector2D b, const float radiusA, const float radiusB);
-        static SVector2D circleToCircleV(SVector2D a, SVector2D b, const float radiusA, const float radiusB);
+        enum CollisionAxis
+        {
+            xAxis,
+            yAxis,
+            Both,
+            None
+        };
+        static CollisionAxis circleToCircle(SVector2D a, SVector2D b, const float radiusA, const float radiusB);
         static bool sphereToSphere(SVector3D a, SVector3D b, const float radiusA, const float radiusB);
-        static bool pointToBox(SVector2D point, const float x1, const float x2, const float z1, const float z2);
-        static bool pointToBox(SVector2D point, SVector2D boxCenter, const float halfSide);
-        static bool pointToBox(SVector2D point, SVector2D boxCenter, const float halfWidth, const float halfLength);
+        static CollisionAxis pointToBox(SVector2D point, const float x1, const float x2, const float z1, const float z2);
+        static CollisionAxis pointToBox(SVector2D point, SVector2D boxCenter, const float halfSide);
+        static CollisionAxis pointToBox(SVector2D point, SVector2D boxCenter, const float halfWidth, const float halfLength);
         static bool pointToBox(SVector3D point, const float x1, const float x2, const float y1, const float y2, const float z1, const float z2);
-        static bool circleToBox(SVector2D circle, const float radius, SVector2D boxCentre, const float halfSide);
-        static bool circleToBox(SVector2D circle, const float radius, SVector2D boxCentre, const float halfWidth, const float halfLength);
+        static CollisionAxis circleToBox(SVector2D circle, const float radius, SVector2D boxCentre, const float halfSide);
+        static CollisionAxis circleToBox(SVector2D circle, const float radius, SVector2D boxCentre, const float halfWidth, const float halfLength);
     };
 }
 

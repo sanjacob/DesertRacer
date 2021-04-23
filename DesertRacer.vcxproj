@@ -127,6 +127,8 @@ copy "C:\ProgramData\TL-Engine\3rd Party\TL-Xtreme\shader\*.*" "$(OutDir)" &gt; 
   <ItemGroup>
     <ClCompile Include="ai.cpp" />
     <ClCompile Include="camera.cpp" />
+    <ClCompile Include="particle.cpp" />
+    <ClCompile Include="track_selection.cpp" />
     <ClCompile Include="ui.cpp" />
     <ClCompile Include="racecar.cpp" />
     <ClCompile Include="checkpoint.cpp" />
@@ -137,13 +139,13 @@ copy "C:\ProgramData\TL-Engine\3rd Party\TL-Xtreme\shader\*.*" "$(OutDir)" &gt; 
     <ClCompile Include="racetrack.cpp" />
     <ClCompile Include="startup.cpp" />
     <ClCompile Include="scenery.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ReadMe.txt" />
+    <ClCompile Include="vehicle.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ai.h" />
     <ClInclude Include="camera.h" />
+    <ClInclude Include="particle.h" />
+    <ClInclude Include="track_selection.h" />
     <ClInclude Include="ui.h" />
     <ClInclude Include="racecar.h" />
     <ClInclude Include="checkpoint.h" />
@@ -155,6 +157,7 @@ copy "C:\ProgramData\TL-Engine\3rd Party\TL-Xtreme\shader\*.*" "$(OutDir)" &gt; 
     <ClInclude Include="files.h" />
     <ClInclude Include="racetrack.h" />
     <ClInclude Include="scenery.h" />
+    <ClInclude Include="vehicle.h" />
   </ItemGroup>
   <!--<ItemGroup>
     <FxCompile Include="ColTex.psh" />

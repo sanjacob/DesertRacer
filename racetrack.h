@@ -16,6 +16,8 @@
 #include "racecar.h"
 #include "ui.h"
 #include "ai.h"
+#include "vehicle.h"
+#include "particle.h"
 
 
 namespace desert
@@ -44,7 +46,7 @@ namespace desert
         // Destroy racetrack, free memory
         ~DesertRacetrack();
         // Choose the correct object type for each model loaded
-        void handleModel(tle::IModel* model, std::string type, NodeAlignment alignment, tle::IMesh* crossMesh);
+        void handleModel(tle::IModel* model, std::string type, NodeAlignment alignment);
         /** 
         * Setup next frame of scene
         * This includes handling user input, detecting collisions, etc
@@ -69,14 +71,14 @@ namespace desert
         int getStagesNumber() const;
 
         HoverCar* racecarPtr;
-        RaceState raceState = Transcurring;
+        RaceState raceState = NotStarted;
 
     protected:
         // Detect collisions between objects, handle user input, etc
         void updateOngoingRaceScene(tle::I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime);
 
         // Update UI based on current racecar status (boost indicators, speed)
-        void updateUI();
+        void updateUI(float kDeltaTime = 1.0f);
         // Update health (only called when car is damaged)
         void updateHealthInUI();
         // Update laps (only called when car completes a lap)
@@ -92,7 +94,8 @@ namespace desert
         const std::string kMeshFilesExtension = ".x";
 
         // Cross mesh filename (used for checkpoints)
-        const std::string crossMeshFilename = "Cross" + kMeshFilesExtension;
+        const std::string kCrossMeshFilename = "Cross" + kMeshFilesExtension;
+        const std::string kFlareMeshFilename = "Flare" + kMeshFilesExtension;
 
         // Since text file does not contain Y positions, we just hold a couple of them
         // Default Y axis position for all models
@@ -106,7 +109,44 @@ namespace desert
         const int kSecondsBeforeRace = 3;
         
         // Total number of laps
-        const int kLaps = 1;
+        const int kLaps = 3;
+
+        const int kSecsInAnHour = 60 * 60;
+        const int kMetersInKm = 1000;
+
+        const tle::EKeyCode kFollowCamKey = Key_1;
+        const tle::EKeyCode kPovCamKey = Key_2;
+
+        const int kSetupXIndex = 1;
+        const int kSetupZIndex = 2;
+        const int kSetupYRotIndex = 3;
+        const int kSetupYIndex = 4;
+        const int kSetupXRotIndex = 5;
+        const int kSetupZRotIndex = 6;
+        const int kSetupScaleIndex = 7;
+
+        const std::string barrelModel = "Barrel";
+        const std::string dummyThiccModel = "Dummy";
+
+        const SVector3D barrelOffset = { 0, 8, 0 };
+
+        // Collision Radiuses
+        std::unordered_map<std::string, float> kCustomCollisionRadius
+        {
+            { "Snowman", 8.0f },
+            { "Moon", 180.0f },
+            { "Barrel", 6.0f },
+            { "TankSmall1", 3.0f },
+            { "TankSmall2", 3.0f }
+        };
+
+        std::vector<std::string> racecarSkins
+        {
+            "ai_red.png",
+            "ai_blue.png",
+            "ai_purple.png",
+            "ai_teal.png"
+        };
  
         // Don't load a mesh twice
         std::unordered_map<std::string, tle::IMesh*> mMeshes;
@@ -117,8 +157,14 @@ namespace desert
         // Other scenery
         std::vector<tle::IModel*> mScenery;
         // AI & waypoints
-        std::vector<HoverAI> mAI;
+        std::vector<HoverAI*> mAI;
         std::vector<tle::IModel*> mWaypoints;
+        // Numbering
+        std::vector<int> mOrdinals;
+        std::vector<DesertVehicle*> mVehicles;
+
+        // Particle Systems
+        std::vector<ParticleSystem*> mParticles;
 
         // User interface (sprites / dialog)
         GameUI* uiPtr = nullptr;
@@ -126,18 +172,21 @@ namespace desert
         // Current camera
         tle::ICamera* currentCamera;
 
+        tle::IMesh* crossMesh;
+        tle::IMesh* flareMesh;
+
+        Collision::CollisionAxis mLastCollisionAxis;
+
         // Start timer
         float timeElapsed = 0.0f;
         // Start countdown
         int secondsElapsed = 0;
 
-        // Current lap
-        int currentLap = 0;
-        // Current checkpoint crossed
-        int currentStage = 0;
+        // Race timer
+        float raceElapsed = 0.0f;
 
         // Whether race ended because of car damage
-        bool raceOverDueToDamage = false;
+        //bool raceOverDueToDamage = false;
         // The car receives no further damage for any
         // additional frames it is in collision with something
         bool carCollidedLastFrame = false;

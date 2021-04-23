@@ -12,13 +12,16 @@
 #include "node.h"
 #include "racecar.h"
 #include "keybinds.h"
+#include "particle.h"
 
 using namespace tle;
 using namespace desert;
 
+const string HoverCar::kDefaultModelName = "Racecar";
 
-HoverCar::HoverCar(IModel* m, const SControlKeybinding carKeybinding) : SceneNodeContainer(m), mKeybind(carKeybinding)
+HoverCar::HoverCar(IModel* m, const SControlKeybinding carKeybinding, IMesh* flareMesh) : DesertVehicle(m, DesertVehicle::VehicleType::Player), mKeybind(carKeybinding)
 {
+	mTag = "Player 1";
 	node->SetY(kModelYOffset);
 	cout << "HoverCar created" << endl;
 }
@@ -77,7 +80,6 @@ float HoverCar::processBoost(tle::I3DEngine* myEngine, const float kDeltaTime)
 			{
 				boostState = Active;
 				boostMultiplier = kBoost;
-
 				if ((boostTimer + kBoostWarningTime) >= kBoostMaxTimeActive)
 				{
 					boostState = Warning;
@@ -195,6 +197,12 @@ void HoverCar::processBobble(const float kGameSpeed, const float kDeltaTime)
 		{
 			int heightModifier = (node->GetY() > kModelYOffset) ? -1 : 1;
 			node->MoveY(heightModifier * frameSpeed * kResetYSpeed);
+
+			if ((node->GetY() - kModelYOffset) < (frameSpeed * kResetYSpeed))
+			{
+				node->SetY(kModelYOffset);
+			}
+			
 			timeElapsedMoving = 0;
 		}
 
@@ -218,7 +226,6 @@ void HoverCar::processBobble(const float kGameSpeed, const float kDeltaTime)
 void HoverCar::control(I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime)
 {
 	const float frameSpeed = kGameSpeed * kDeltaTime;
-	
 	// Reset states
 	inclinationState = NotTurning;
 	carState = Stationary;
@@ -231,7 +238,6 @@ void HoverCar::control(I3DEngine* myEngine, const float kGameSpeed, const float 
 	processBobble(kGameSpeed, kDeltaTime);
 	processLean(frameSpeed, turnMultiplier);
 	controlCameras(myEngine, kGameSpeed, kDeltaTime);
-	//cout << position2D().asString() << endl;
 }
 
 void HoverCar::controlCameras(I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime)
@@ -267,11 +273,31 @@ void HoverCar::applyMovementVector()
 {
 	moveByVector(movementThisFrame);
 	movementThisFrame *= (kDrag * boostDragMultiplier);
+	if (movementThisFrame.length() < kDragCutoff)
+	{
+		movementThisFrame.zeroOut();
+	}
 }
 
-void HoverCar::bounce()
+SVector2D HoverCar::getMovementVector()
 {
-	movementThisFrame = -movementThisFrame * kBounce;
+	return movementThisFrame;
+}
+
+void HoverCar::bounce(Collision::CollisionAxis reverse)
+{
+	switch (reverse)
+	{
+	case desert::Collision::xAxis:
+		movementThisFrame.x = -movementThisFrame.x * kBounce;
+		break;
+	case desert::Collision::yAxis:
+		movementThisFrame.y = -movementThisFrame.y * kBounce;
+		break;
+	default:
+		movementThisFrame = -movementThisFrame * kBounce;
+		break;
+	}
 }
 
 void HoverCar::reset()
@@ -284,6 +310,7 @@ void HoverCar::reset()
 	lean = 0;
 	rearLift = 0;
 	rotationSpeed = kInitialRotation;
+	resetStage();
 }
 
 ICamera* HoverCar::getCamera()
@@ -304,8 +331,8 @@ int HoverCar::getHealth() const
 	return health;
 }
 
-int HoverCar::getSpeed() const
+float HoverCar::getSpeed() const
 {
-	SVector2D scaledVector = movementThisFrame * 100;
-	return scaledVector.length();
+	SVector2D scaledVector = movementThisFrame;
+	return scaledVector.length() * kWorldScale;
 }

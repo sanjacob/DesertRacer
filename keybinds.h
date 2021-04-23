@@ -43,6 +43,7 @@ namespace desert
 		const tle::EKeyCode kRestartGame;
 		const tle::EKeyCode kToggleMouseCapture;
 		const tle::EKeyCode kQuitGame;
+		const tle::EKeyCode kSelectTrack;
 	};
 
 	// A struct that combines the three above
@@ -55,7 +56,7 @@ namespace desert
 
 	// Default layout-agnostic keys
 	const SCameraKeybinding kDefaultCameraBind = { tle::Key_Up, tle::Key_Down, tle::Key_Right, tle::Key_Left, tle::Key_1, tle::Key_Shift };
-	const SMetaKeybinding kDefaultMetaBind = { tle::Key_P, tle::Key_Space, tle::Key_R, tle::Key_Tab, tle::Key_Escape };
+	const SMetaKeybinding kDefaultMetaBind = { tle::Key_P, tle::Key_Space, tle::Key_R, tle::Key_Tab, tle::Key_Escape, tle::Mouse_LButton };
 
 	// QWERTY
 	const SPlayerKeybinding kDefaultQwertyBind = { kDefaultCameraBind, { tle::Key_W, tle::Key_S, tle::Key_D, tle::Key_A, tle::Key_Space },  kDefaultMetaBind};

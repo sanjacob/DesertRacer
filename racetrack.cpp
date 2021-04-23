@@ -10,6 +10,7 @@
 #include <iostream>
 #include <vector>
 #include <unordered_map> // Mesh storage
+#include <algorithm>
 
 #include "node.h"
 #include "racetrack.h"
@@ -19,6 +20,8 @@
 #include "ai.h"
 #include "keybinds.h"
 #include "scenery.h"
+#include "collision.h"
+#include "particle.h"
 
 using namespace std;
 using namespace tle;
@@ -40,7 +43,8 @@ DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 	currentCamera = followCam;
 
 	// Load cross mesh
-	IMesh* crossMesh = myEngine->LoadMesh(crossMeshFilename);
+	crossMesh = myEngine->LoadMesh(kCrossMeshFilename);
+	flareMesh = myEngine->LoadMesh(kFlareMeshFilename);
 
 	bool playerLoaded = false;
 	
@@ -49,9 +53,29 @@ DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 	{
 		vector<string> setupElements = Files::splitLine(setupLine);
 		const string meshFilename = setupElements[0];
+		float initialY = kDefaultY, xRotation = 0, zRotation = 0, scale = 1;
 
-		const float initialX = stof(setupElements[1]), initialZ = stof(setupElements[2]), rotation = stof(setupElements[3]);
-		float initialY = kDefaultY;
+		const float initialX = stof(setupElements[kSetupXIndex]), initialZ = stof(setupElements[kSetupZIndex]), yRotation = stof(setupElements[kSetupYRotIndex]);
+
+		if (setupElements.size() > kSetupYIndex)
+		{
+			initialY = stof(setupElements[kSetupYIndex]);
+		}
+
+		if (setupElements.size() > kSetupXRotIndex)
+		{
+			xRotation = stof(setupElements[kSetupXRotIndex]);
+		}
+
+		if (setupElements.size() > kSetupZRotIndex)
+		{
+			zRotation = stof(setupElements[kSetupZRotIndex]);
+		}
+
+		if (setupElements.size() > kSetupScaleIndex)
+		{
+			scale = stof(setupElements[kSetupScaleIndex]);
+		}
 
 		cout << "Loading model of " << meshFilename << endl;
 
@@ -61,31 +85,24 @@ DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 			mMeshes[meshFilename] = myEngine->LoadMesh(meshFilename + kMeshFilesExtension);
 		}
 
-		// Set special cases Y axis
-		if (meshFilename == "Skybox")
-		{
-			initialY = kSkyboxInitialY;
-		}
-		else if (meshFilename == "Cube")
-		{
-			initialY = kCubeInitialY;
-		}
-
 		// Create model in specified location
 		IModel* model = mMeshes[meshFilename]->CreateModel(initialX, initialY, initialZ);
 		// Rotate if necessary
-		model->RotateY(rotation);
+		model->RotateY(yRotation);
+		model->RotateX(xRotation);
+		model->RotateZ(zRotation);
+		model->Scale(scale);
 
 		// Detect model axis alignment
-		NodeAlignment alignment = SceneNodeContainer::getAlignmentFromRotation(rotation);
+		NodeAlignment alignment = SceneNodeContainer::getAlignmentFromRotation(yRotation);
 
-		if (!playerLoaded && meshFilename == "race2")
+		if (!playerLoaded && meshFilename == "Racecar")
 		{
 			followCam->AttachToParent(model);
 			povCam->AttachToParent(model);
 
-			DesertCamera followDesertCam = DesertCamera(followCam, Key_1, true, kDefaultCameraBind);
-			DesertCamera povDesertCam = DesertCamera(povCam, Key_2);
+			DesertCamera followDesertCam = DesertCamera(followCam, kFollowCamKey, true, kDefaultCameraBind);
+			DesertCamera povDesertCam = DesertCamera(povCam, kPovCamKey);
 
 			followDesertCam.moveLocallyByVector(kFollowCamPosition);
 			followDesertCam.rotateLocallyByVector(kFollowCamRotation);
@@ -93,14 +110,15 @@ DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 			povDesertCam.moveLocallyByVector(kPovCamPosition);
 			povDesertCam.rotateLocallyByVector(kPovCamRotation);
 
-			racecarPtr = new HoverCar(model, controlKeybind);
-			racecarPtr->AddCamera(followDesertCam);
-			racecarPtr->AddCamera(povDesertCam);
+			racecarPtr = new HoverCar(model, controlKeybind, flareMesh);
+			racecarPtr->addCamera(followDesertCam);
+			racecarPtr->addCamera(povDesertCam);
+			mVehicles.push_back(racecarPtr);
 			playerLoaded = true;
 		}
 		else
 		{
-			handleModel(model, meshFilename, alignment, crossMesh);
+			handleModel(model, meshFilename, alignment);
 		}
 	}
 
@@ -131,48 +149,73 @@ DesertRacetrack::~DesertRacetrack()
 		node = nullptr;
 	}
 
+	for (ParticleSystem* pSystem : mParticles)
+	{
+		delete pSystem;
+		pSystem = nullptr;
+	}
+
 	cout << "Racetrack destroyed" << endl;
 }
 
-void DesertRacetrack::handleModel(IModel* model, string type, NodeAlignment alignment, IMesh* crossMesh)
+void DesertRacetrack::handleModel(IModel* model, string type, NodeAlignment alignment)
 {
 	// Model is a non-player hover car
-	if (type == "race2")
+	if (type == HoverCar::kDefaultModelName)
 	{
-		mAI.push_back(HoverAI(model));
-		mAI.back().follow(mWaypoints.front());
+		model->SetSkin(racecarSkins.at(mAI.size()));
+		mAI.push_back(new HoverAI(model, "CPU #" + to_string(mAI.size() + 1)));
+		mAI.back()->follow(mWaypoints.front());
+		mCollisionNodes.push_back(mAI.back());
+		mVehicles.push_back(mAI.back());
 	}
 	// Model is a checkpoint
-	else if (type == "Checkpoint")
+	else if (type == DesertCheckpoint::kDefaultModelName)
 	{
 		mCheckpoints.push_back(new DesertCheckpoint(model, alignment, crossMesh));
 		// Strut collision detection as collision node
 		mCollisionNodes.push_back(mCheckpoints.back());
 	}
 	// Dummy waypoint for AI
-	else if (type == "Dummy")
+	else if (type == dummyThiccModel)
 	{
 		mWaypoints.push_back(model);
 	}
 	// Model is a wall
-	else if (type == "Wall")
+	else if (type == DesertWall::kDefaultModelName)
 	{
 		mCollisionNodes.push_back(new DesertWall(model, alignment));
 	}
-	// Model is a tank
-	else if (type == "TankSmall1" || type == "TankSmall2")
+	else if (type == DesertTower::kDefaultModelName)
 	{
-		mCollisionNodes.push_back(new DesertTank(model));
+		mCollisionNodes.push_back(new DesertTower(model, alignment));
+	}
+	else if (kCustomCollisionRadius.count(type))
+	{
+		mCollisionNodes.push_back(new CustomSphereCModel(model, kCustomCollisionRadius[type]));
 	}
 	// Just throw it somewhere
 	else
 	{
 		mScenery.push_back(model);
 	}
+
+	if (type == barrelModel)
+	{
+		SVector3D p = mCollisionNodes.back()->position();
+		p += barrelOffset;
+		mParticles.push_back(new FireParticleSystem(flareMesh, p));
+		mParticles.back()->setup();
+	}
 }
 
 void DesertRacetrack::updateScene(I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime)
 {
+	for (ParticleSystem* p : mParticles)
+	{
+		p->updateSystem(kDeltaTime);
+	}
+
 	// Race has not started
 	if (raceState == NotStarted)
 	{
@@ -207,6 +250,7 @@ void DesertRacetrack::updateScene(I3DEngine* myEngine, const float kGameSpeed, c
 		{
 			// Display go indefinitely
 			uiPtr->displayText("Go!", false, 0);
+			uiPtr->togglePosition(true);
 			// Race has started, update state
 			raceState = Transcurring;
 			// Reset seconds elapsed for next cycle
@@ -221,18 +265,12 @@ void DesertRacetrack::updateScene(I3DEngine* myEngine, const float kGameSpeed, c
 	}
 	else if (raceState == Transcurring)
 	{
+		raceElapsed += kDeltaTime;
 		updateOngoingRaceScene(myEngine, kGameSpeed, kDeltaTime);
 	}
 	// Race has ended
 	else if (raceState == Over)
 	{
-		// Check cause of race ending 
-		if (raceOverDueToDamage)
-		{
-			// Update dialog
-			uiPtr->displayText("Your car is done for :(", false, 0, "Press R to Restart :)");
-		}
-
 		// Wait until user presses restart key
 		if (myEngine->KeyHit(kDefaultMetaBind.kRestartGame))
 		{
@@ -253,56 +291,71 @@ void DesertRacetrack::detectCheckpointCrossings(const float kDeltaTime)
 
 	for (DesertCheckpoint* checkpoint : mCheckpoints)
 	{
-		// Box collision
-		if (checkpoint->checkpointCollision(racecarPtr->position2D()))
+		for (DesertVehicle* vehicle : mVehicles)
 		{
-			// If checkpoint crossed is the next one
-			if (currentStage % getStagesNumber() == i)
+			if (checkpoint->checkpointCollision(vehicle->position2D()))
 			{
-				// Display cross
-				checkpoint->setCrossed();
-				// Increment stage state
-				currentStage++;
-
-				// First checkpoint
-				if (!i)
+				if (vehicle->getCurrentStage() % getStagesNumber() == i)
 				{
-					currentLap++;
+					// Increment stage state
+					vehicle->nextStage();
 
-					// Player has completed the race
-					if (currentLap > kLaps)
+					if (vehicle->isPlayer())
 					{
-						// Update race state
-						raceState = Over;
-
-						// Update UI
-						uiPtr->displayText("Race finished", true, 0, "Press R to Restart, Esc to Exit");
-						uiPtr->toggleLapSprite(false);
+						// Display cross
+						checkpoint->setCrossed();
 					}
-					// Lap completed
-					else
-					{
-						string lapDisplayText = "Final Lap";
 
-						if (currentLap != kLaps)
+					// First checkpoint
+					if (!i)
+					{
+						vehicle->nextLap();
+
+						// Player has completed the race
+						if (vehicle->getCurrentLap() > kLaps)
 						{
-							lapDisplayText = "Lap " + to_string(currentLap);
+							vehicle->resetStage();
+							// Update race state
+							raceState = Over;
+							uiPtr->toggleSummary(true);
+							uiPtr->setSummaryTime(to_string(raceElapsed));
+							uiPtr->setSummaryWinner(vehicle->getTag());
+							raceElapsed = 0.0f;
+
+							if (vehicle->isPlayer())
+							{
+								// Update UI
+								uiPtr->displayText("Race finished", true, 0, "Press R to Restart, Esc to Exit");
+								uiPtr->toggleLapSprite(false);
+							}
 						}
+						// Lap completed
+						else if (vehicle->isPlayer())
+						{
+							string lapDisplayText = "Final Lap";
 
-						// Update UI
-						uiPtr->displayText(lapDisplayText, false, 1.0f);
-						updateLapsInUI();
+							if (vehicle->getCurrentLap() != kLaps)
+							{
+								lapDisplayText = "Lap " + to_string(vehicle->getCurrentLap());
+							}
+
+							// Update UI
+							uiPtr->displayText(lapDisplayText, false, 1.0f);
+							updateLapsInUI();
+						}
 					}
-				}
 
-				// Other checkpoint or it's the first lap
-				if (i || currentLap == 1)
-				{
-					// Show stage completion dialog
-					string dispText = "Stage " + to_string(currentStage) + " complete";
-					uiPtr->displayText(dispText, false, 1.0f);
+					// Other checkpoint or it's the first lap
+					if (vehicle->isPlayer() && (i || vehicle->getCurrentLap() == 1))
+					{
+						// Show stage completion dialog
+						string dispText = "Stage " + to_string(vehicle->getCurrentStage()) + " complete";
+						uiPtr->displayText(dispText, false, 1.0f);
+					}
 				}
 			}
+			SVector2D nextCheckpoint = mCheckpoints[vehicle->getCurrentStage() % getStagesNumber()]->position2D();
+			vehicle->setDistanceToCheckpoint(vehicle->distanceTo(nextCheckpoint));
 		}
 
 		// Update cross position
@@ -316,36 +369,52 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 	// To avoid cancelling the car's vector twice, therefore not cancelling it at all,
 	// only count one collision per frame
 	bool carHasCollided = false;
+	Collision::CollisionAxis reverseAxis = Collision::CollisionAxis::None;
 
 	// Handle racecar user input
 	racecarPtr->control(myEngine, kGameSpeed, kDeltaTime);
 	// Update camera
-	currentCamera = racecarPtr->currentCamera;
+	currentCamera = racecarPtr->getCamera();
 
 	// Update AI movement
-	for (HoverAI& hoverAI : mAI)
+	for (HoverAI* hoverAI : mAI)
 	{
-		// If AI has reached its current target
-		if (hoverAI.updateScene(kGameSpeed, kDeltaTime))
-		{
-			// Calculate next waypoint
-			unsigned int nextWaypointI = hoverAI.getWaypointIndex();
+		// Rubberbanding
+		bool ahead = DesertVehicle::compare(hoverAI, racecarPtr);
 
+		// If AI has reached its current target
+		if (hoverAI->updateScene(kGameSpeed, kDeltaTime, racecarPtr->distanceTo(hoverAI->position2D()), ahead))
+		{
+			cout << "Reached waypoint" << endl;
+ 			// Calculate next waypoint
+			unsigned int nextWaypointI = hoverAI->getWaypointIndex();
+			cout << nextWaypointI << endl;
 			if (mWaypoints.size() > nextWaypointI)
 			{
 				// Set AI's next target
-				hoverAI.follow(mWaypoints[nextWaypointI]);
+				hoverAI->follow(mWaypoints[nextWaypointI]);
 			}
-			// AI has reached the last waypoint
+			//// AI has reached the last waypoint
 			else
 			{
-				hoverAI.stop();
+				hoverAI->resetWaypoint();
 			}
 		}
 	}
 
 	// Checkpoint crossing detection & handling
 	detectCheckpointCrossings(kDeltaTime);
+	 
+	// Sort vehicles by their race position
+	sort(mVehicles.begin(), mVehicles.end(), &DesertVehicle::compare);
+
+	// Update race position inside vehicle objects
+	int i = 1;
+	for (DesertVehicle* vehicle : mVehicles)
+	{
+		vehicle->setRacePosition(i);
+		i++;
+	}
 
 	/** First, detect collision for
 	* - Player
@@ -360,17 +429,25 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 	*/
 	for (CollisionModel* node : mCollisionNodes)
 	{
+		Collision::CollisionAxis axis = node->collision(racecarPtr->position2D(), racecarPtr->getCollisionRadius(), true);
+
 		// Test for collision
-		if (!carHasCollided && node->collision(racecarPtr->position2D(), racecarPtr->getCollisionRadius()))
+		if (!carHasCollided && axis == Collision::CollisionAxis::Both)
 		{
+			reverseAxis = node->getNewCollisionAxis();
 			carHasCollided = true;
+
+			if (!node->isFixed())
+			{
+				node->modifyMovementVector(racecarPtr->getMovementVector());
+			}
 		}
 
-		for (HoverAI& hoverAI : mAI)
+		for (HoverAI* hoverAI : mAI)
 		{
-			if (node->collision(hoverAI.position2D(), hoverAI.getCollisionRadius()))
+			if (node != hoverAI && node->collision(hoverAI->position2D(), hoverAI->getCollisionRadius()) == Collision::CollisionAxis::Both)
 			{
-				hoverAI.setCollided();
+				hoverAI->setCollided();
 			}
 		}
 	}
@@ -382,7 +459,7 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 	if (carHasCollided && !carCollidedLastFrame)
 	{
 		// Cancel vector out
-		racecarPtr->bounce();
+		racecarPtr->bounce(reverseAxis);
 		// Reduce health, update UI
 		racecarPtr->reduceHealth();
 		updateHealthInUI();
@@ -390,8 +467,8 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 		// If car has no more health, stop race
 		if (!racecarPtr->getHealth())
 		{
-			raceOverDueToDamage = true;
 			raceState = Over;
+			uiPtr->displayText("Your car is done for :(", false, 0, "Press R to Restart :)");
 		}
 	}
 
@@ -399,23 +476,18 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 	racecarPtr->applyMovementVector();
 
 	// Handle AI collisions
-	for (HoverAI& hoverAI : mAI)
+	for (HoverAI* hoverAI : mAI)
 	{
-		if (hoverAI.hasCollided())
+		if (hoverAI->hasCollided())
 		{
 			// Cancel AI vector
-			hoverAI.bounce();
-			hoverAI.resetCollided();
+			hoverAI->bounce();
+			hoverAI->reduceHealth();
 		}
 
 		// Apply movement vector result
-		hoverAI.applyMovementVector();
-
-		// Recalculate route after collision
-		if (hoverAI.hasCollided())
-		{
-			hoverAI.follow(mWaypoints[hoverAI.getWaypointIndex() - 1], false);
-		}
+		hoverAI->applyMovementVector();
+		hoverAI->resetCollided();
 	}
 
 	updateUI();
@@ -424,9 +496,6 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 
 void DesertRacetrack::reset()
 {
-	// Reset race progress info
-	currentStage = 0;
-	currentLap = 0;
 	// Reset car position and movement
 	racecarPtr->reset();
 	// Reset UI
@@ -439,9 +508,10 @@ void DesertRacetrack::reset()
 	}
 
 	// Reset AI to original position and waypoint
-	for (HoverAI& ai : mAI)
+	for (HoverAI* ai : mAI)
 	{
-		//ai.reset();
+		ai->reset();
+		ai->follow(mWaypoints.front());
 	}
 }
 
@@ -459,36 +529,48 @@ int DesertRacetrack::getStagesNumber() const
 // UI
 ////////////////////
 
-void DesertRacetrack::updateUI()
+void DesertRacetrack::updateUI(float kDeltaTime)
 {
 	// Hide all boost indicators
-	uiPtr->toggleBoostIndicator(false);
-	uiPtr->toggleWarnIndicator(false);
-	uiPtr->toggleOverheatWarning(false);
+	uiPtr->toggleBoost(false);
+	uiPtr->toggleWarning(false);
+	uiPtr->toggleOverheat(false);
 
 	// Show only the active one
 	switch (racecarPtr->getBoostState())
 	{
 	case HoverCar::BoostState::Active:
-		uiPtr->toggleBoostIndicator(true);
+		uiPtr->toggleBoost(true);
 		break;
 	case HoverCar::BoostState::Warning:
-		uiPtr->toggleWarnIndicator(true);
+		uiPtr->toggleWarning(true);
 		break;
 	case HoverCar::BoostState::Penalty:
-		uiPtr->toggleOverheatWarning(true);
+		uiPtr->toggleOverheat(true);
 		break;
 	default:
 		break;
 	}
 
+
+	// To get km/h
+	// Get number of frames in one second
+	const float fps = 1 / kDeltaTime;
+	
+	// Multiply by the seconds in an hour to get frames in an hour
+	// Then by racecar speed
+	float speedInKm = (racecarPtr->getSpeed() / kMetersInKm);
+	//cout << speedInKm << endl;
+	const int kmPerH = fps * kSecsInAnHour * speedInKm;
+
 	// Update speed
-	uiPtr->setSpeedText(to_string(racecarPtr->getSpeed()));
+	uiPtr->setSpeedText(to_string(kmPerH) + "km/h");
+	uiPtr->setRacePosition(racecarPtr->getRacePosition());
 }
 
 void DesertRacetrack::updateLapsInUI()
 {
-	uiPtr->setLapText(to_string(currentLap) + "/" + to_string(kLaps));
+	uiPtr->setLapText(to_string(racecarPtr->getCurrentLap()) + "/" + to_string(kLaps));
 }
 
 void DesertRacetrack::updateHealthInUI()
@@ -499,4 +581,8 @@ void DesertRacetrack::updateHealthInUI()
 void DesertRacetrack::resetDialog()
 {
 	uiPtr->displayText("Hit Space to Start", false, 0);
+	updateHealthInUI();
+	uiPtr->setLapText("1/" + to_string(kLaps));
+	uiPtr->togglePosition(false);
+	uiPtr->toggleSummary(false);
 }

@@ -45,6 +45,11 @@ SVector2D SceneNodeContainer::getFacingVector2D() const
 	return  { matrix[2][0], matrix[2][2] };
 }
 
+float SceneNodeContainer::distanceTo(SVector2D point) const
+{
+	return (position2D() - point).length();
+}
+
 void SceneNodeContainer::resetPosition(bool x, bool y, bool z)
 {
 	if (x) { node->SetX(kInitialPosition.x); }
@@ -57,6 +62,11 @@ void SceneNodeContainer::resetLocalPosition(bool x, bool y, bool z)
 	if (x) { node->SetLocalX(kInitialLocalPosition.x); }
 	if (y) { node->SetLocalY(kInitialLocalPosition.y); }
 	if (z) { node->SetLocalZ(kInitialLocalPosition.z); }
+}
+
+void SceneNodeContainer::setPositionByVector(SVector3D vector)
+{
+	node->SetPosition(vector.x, vector.y, vector.z);
 }
 
 void SceneNodeContainer::moveByVector(SVector3D vector)
@@ -126,15 +136,34 @@ CollisionModel::~CollisionModel()
 	cout << "Collision Model destroyed" << endl;
 }
 
+bool CollisionModel::isFixed()
+{
+	return mFixed;
+}
+
+bool CollisionModel::vectorWasModified()
+{
+	return mVectorModified;
+}
+
+void CollisionModel::modifyMovementVector(SVector2D change) {}
+
+Collision::CollisionAxis CollisionModel::getNewCollisionAxis()
+{
+	return mNewCollisionAxis;
+}
+
 SphereCollisionModel::SphereCollisionModel(IModel* m) : CollisionModel(m) {}
 
-bool SphereCollisionModel::collision(SVector2D position, const float collisionRadius)
+Collision::CollisionAxis SphereCollisionModel::collision(SVector2D position, const float collisionRadius, bool saveAxis)
 {
+	mVectorModified = false;
 	return Collision::circleToCircle(position, position2D(), collisionRadius, mRadius);
 }
 
-bool SphereCollisionModel::collision(SphereCollisionModel other)
+Collision::CollisionAxis SphereCollisionModel::collision(SphereCollisionModel other)
 {
+	mVectorModified = false;
 	return Collision::circleToCircle(other.position2D(), position2D(), other.getCollisionRadius(), mRadius);
 }
 
@@ -145,16 +174,64 @@ int SphereCollisionModel::getCollisionRadius()
 
 BoxCollisionModel::BoxCollisionModel(IModel* m, NodeAlignment a) : CollisionModel(m), mAlignment(a) {}
 
-bool BoxCollisionModel::collision(SVector2D position, const float collisionRadius)
+Collision::CollisionAxis BoxCollisionModel::collision(SVector2D position, const float collisionRadius, bool saveAxis)
 {
+	mVectorModified = false;
+	Collision::CollisionAxis axis;
+
 	if (mAlignment == zAligned)
-		return Collision::circleToBox(position, collisionRadius, position2D(), mHalfLength, mHalfWidth);
-	return Collision::circleToBox(position, collisionRadius, position2D(), mHalfWidth, mHalfLength);
+	{
+		axis = Collision::circleToBox(position, collisionRadius, position2D(), mHalfLength, mHalfWidth);
+	}
+	else
+	{
+		axis = Collision::circleToBox(position, collisionRadius, position2D(), mHalfWidth, mHalfLength);
+	}
+
+	if (saveAxis)
+	{
+		setNewCollisionAxis(axis);
+		mLastCollisionAxis = axis;
+	}
+	return axis;
 }
 
-bool BoxCollisionModel::collision(SphereCollisionModel other)
+Collision::CollisionAxis BoxCollisionModel::collision(SphereCollisionModel other)
 {
+	mVectorModified = false;
+	Collision::CollisionAxis axis;
+	
 	if (mAlignment == zAligned)
-		return Collision::circleToBox(other.position2D(), other.getCollisionRadius(), position2D(), mHalfLength, mHalfWidth);
-	return Collision::circleToBox(other.position2D(), other.getCollisionRadius(), position2D(), mHalfWidth, mHalfLength);
+	{
+		axis = Collision::circleToBox(other.position2D(), other.getCollisionRadius(), position2D(), mHalfLength, mHalfWidth);
+	}
+	else
+	{
+		axis = Collision::circleToBox(other.position2D(), other.getCollisionRadius(), position2D(), mHalfWidth, mHalfLength);
+	}
+
+	setNewCollisionAxis(axis);
+	mLastCollisionAxis = axis;
+	return axis;
+}
+
+void CollisionModel::setNewCollisionAxis(Collision::CollisionAxis axis)
+{
+	mNewCollisionAxis = Collision::None;
+
+	if (axis == Collision::Both)
+	{
+		switch (mLastCollisionAxis)
+		{
+		case desert::Collision::xAxis:
+			mNewCollisionAxis = Collision::yAxis;
+			break;
+		case desert::Collision::yAxis:
+			mNewCollisionAxis = Collision::xAxis;
+			break;
+		case desert::Collision::None:
+			mNewCollisionAxis = Collision::Both;
+			break;
+		}
+	}
 }

@@ -16,6 +16,7 @@
 #include "keybinds.h" // Default game keybinds
 #include "racetrack.h" // Racetrack class
 #include "startup.h" // Startup screen
+#include "track_selection.h"
 
 // Standard library
 using namespace std;
@@ -27,6 +28,8 @@ using namespace desert;
 
 enum GameState
 {
+	Startup,
+	Selection,
 	Playing,
 	Paused
 };
@@ -37,33 +40,34 @@ void main()
 	const float kGameSpeed = 1;
 	// Folder containing meshes and other assets for the game
 	const string mediaFolder = "media";
+	const string trackFolder = mediaFolder + "\\tracks\\";
 	// Text file containing the names of models used and their initial position
-	const string sceneSetupFilename = mediaFolder + "\\SceneSetup.txt";
-
-	GameState state = Playing;
+	vector<string> tracks { "DefaultTrack.txt", "SnowCircuit.txt", "DeathIsland.txt" };
+	
+	GameState state = Startup;
 
 	// Create a 3D engine
 	I3DEngine* myEngine = New3DEngine(kTLX);
-	myEngine->StartWindowed();
+	//myEngine->StartWindowed();
+	myEngine->StartWindowed(1920, 1080);
 
 	// Add folder for meshes and other media
 	myEngine->AddMediaFolder(mediaFolder);
 
 	// Create startup screen
 	TLtendoStartup startupScreen = TLtendoStartup(myEngine);
+	TrackSelection* selectionScreen = nullptr;
 	// Pointer to a racetrack
 	DesertRacetrack* defaultTrack = nullptr;
 
 	// Pointer to currently active camera
 	ICamera* currentCamera = startupScreen.camera;
-	bool startupScreenEnded = false;
 
 	// Game pause indicator
 	IFont* defaultFont = myEngine->LoadFont("Comic Sans MS");
 	const int kPausedTextOffset = 50;
 
 	bool mouseCaptureOn = true;
-	myEngine->StartMouseCapture();
 	
 	// The main game loop, repeat until engine is stopped
 	while (myEngine->IsRunning())
@@ -74,16 +78,26 @@ void main()
 		myEngine->DrawScene(currentCamera);
 
 		// STARTUP SCREEN
-		if (!startupScreenEnded)
+		if (state == Startup)
 		{
-			startupScreenEnded = startupScreen.setupFrame(myEngine, kGameSpeed, kDeltaTime);
-
-			if (startupScreenEnded)
+			if (startupScreen.setupFrame(myEngine, kGameSpeed, kDeltaTime))
 			{
+				state = Selection;
 				// Clean up startup screen
 				startupScreen.remove(myEngine);
+				selectionScreen = new TrackSelection(myEngine, kDefaultMetaBind.kSelectTrack);
+			}
+		}
+		else if (state == Selection)
+		{
+			const int trackIndex = selectionScreen->updateScene(myEngine);
+			if (trackIndex != -1)
+			{
+				state = Playing;
 				// Create racetrack scene
-				defaultTrack = new DesertRacetrack(myEngine, sceneSetupFilename);
+				defaultTrack = new DesertRacetrack(myEngine, trackFolder + tracks.at(trackIndex));
+				selectionScreen->remove(myEngine);
+				myEngine->StartMouseCapture();
 			}
 		}
 		else if (state == Playing)

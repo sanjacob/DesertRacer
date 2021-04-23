@@ -33,7 +33,7 @@ namespace desert
 
     protected:
         // Testing
-        const bool testing = true;
+        const bool testing = false;
 
         // Meshes Filenames //
         const string kMeshFilename = "TLtendo.x";

@@ -21,17 +21,26 @@ namespace desert {
 	public:
 		DesertWall(tle::IModel* m, NodeAlignment alignment);
 		~DesertWall();
+		static const std::string kDefaultModelName;
 	protected:
 		const int kHalfWidth = 2.0f, kHalfLength = 8.5f;
 	};
 
-	class DesertTank : public SphereCollisionModel
+	class DesertTower : public BoxCollisionModel
 	{
 	public:
-		DesertTank(tle::IModel* m);
-		~DesertTank();
+		DesertTower(tle::IModel* m, NodeAlignment alignment);
+		~DesertTower();
+		static const std::string kDefaultModelName;
 	protected:
-		const int kCollisionRadius = 3.0f;
+		const int kHalfWidth = 8.0f, kHalfLength = 8.0f;
+	};
+
+	class CustomSphereCModel : public SphereCollisionModel
+	{
+	public:
+		CustomSphereCModel(tle::IModel* m, const float radius);
+		~CustomSphereCModel();
 	};
 };
 

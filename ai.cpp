@@ -7,6 +7,7 @@
  */
 
 #include <TL-Engine.h>
+#include <string>
 #include "node.h"
 #include "ai.h"
 #include "collision.h"
@@ -15,9 +16,12 @@ using namespace tle;
 using namespace desert;
 
 
-HoverAI::HoverAI(IModel* m) : SphereCollisionModel(m)
+HoverAI::HoverAI(IModel* m, string tag) : DesertVehicle(m, DesertVehicle::VehicleType::AI)
 {
+	mTag = tag;
 	mRadius = kCollisionRadius;
+	// Pushback after collisions
+	mFixed = false;
 	cout << "Hover AI created" << endl;
 }
 
@@ -26,69 +30,116 @@ HoverAI::~HoverAI()
 	cout << "Hover AI destroyed" << endl;
 }
 
-void HoverAI::follow(ISceneNode* destination, bool nextWaypoint)
+void HoverAI::follow(ISceneNode* destination)
 {
-	// Look towards node
-	node->LookAt(destination);
-	// Obtain the facing vector
-	facingVector = getFacingVector2D();
-	
-	// Set next target, increase waypoint index
-	if (nextWaypoint)
-	{
-		currentTarget = { destination->GetX(), destination->GetZ() };
-		++waypointIndex;
-	}
+	currentTargetNode = destination;
+	targetVector = { currentTargetNode->GetX(), currentTargetNode->GetZ() };
+
+	++waypointIndex;
 }
 
-bool HoverAI::updateScene(const float kGameSpeed, const float kDeltaTime)
+bool HoverAI::updateScene(const float kGameSpeed, const float kDeltaTime, const float distanceToPlayer, bool ahead)
 {
-	// If car is after some target
-	if (!currentTarget.isZero())
+	int rubberMultiplier = (ahead) ? 1 : -1;
+	float cappedDistance = distanceToPlayer * rubberMultiplier;
+
+	if (cappedDistance > kMaxRubberDistance)
 	{
+		cappedDistance = kMaxRubberDistance;
+	}
+
+	if (cappedDistance < -kMaxRubberDistance)
+	{
+		cappedDistance = -kMaxRubberDistance;
+	}
+
+	float rubberThrust = mThrust + (cappedDistance / kRubberDivider);
+
+	if (mInvTimer > 0)
+	{
+		mInvTimer -= kDeltaTime;
+	}
+	else if (mInvTimer < 0)
+	{
+		mInvTimer = 0;
+	}
+
+	// If car is after some target
+	if (currentTargetNode != nullptr)
+	{
+		cout << rubberThrust << endl;
 		float frameTiming = kGameSpeed * kDeltaTime;
-		SVector2D moveVector = facingVector * movingSpeed * frameTiming;
+		node->LookAt(currentTargetNode);
 
 		// Update movement vector
-		movementThisFrame += moveVector;
+		movementThisFrame += getFacingVector2D() * rubberThrust * frameTiming;
 		// Returns true if car has almost reached target
-		return (position2D() - currentTarget).length() <= kWaypointArrivalDistance;
+		return ((position2D() - targetVector).length()) <= kWaypointArrivalDistance;
 	}
 	return false;
+}
+
+void HoverAI::modifyMovementVector(SVector2D change)
+{
+	movementThisFrame += change;
+	mVectorModified = true;
 }
 
 void HoverAI::applyMovementVector()
 {
 	// Apply movement vector, drag
 	moveByVector(movementThisFrame);
-	movementThisFrame *= 0.95;
+	movementThisFrame *= kDrag;
 }
 
-void HoverAI::bounce()
+void HoverAI::bounce(Collision::CollisionAxis reverse)
 {
 	// Reverse movement vector
 	movementThisFrame = -movementThisFrame * kBounce;
 }
 
-void HoverAI::stop()
+//void HoverAI::stop()
+//{
+//	// Set target to zero
+//	currentTarget = { 0, 0 };
+//}
+
+void HoverAI::reset()
 {
-	// Set target to zero
-	currentTarget = { 0, 0 };
+	resetPosition();
+	resetStage();
+	movementThisFrame = { 0, 0 };
+	targetVector = { 0, 0 };
+	currentTargetNode = nullptr;
+	waypointIndex = 0;
+	mCollided = false;
+	mHealth = kInitialHealth;
+	mThrust = kInitialThrust;
+	mInvTimer = 0.0f;
 }
 
 void HoverAI::reduceHealth(const int reduction)
 {
-	health -= reduction;
+	mHealth -= reduction;
+
+	if (mHealth < kSpeedHealthNerf)
+	{
+		mThrust = kNerfedThrust;
+	}
 }
 
 void HoverAI::setCollided()
 {
-	collided = true;
+	if (!mInvTimer)
+	{
+		mCollided = true;
+		mInvTimer = kInvTime;
+	}
 }
 
 void HoverAI::resetCollided()
 {
-	collided = false;
+	mCollided = false;
 }
 
 const float HoverAI::getCollisionRadius() const
@@ -103,5 +154,10 @@ unsigned int HoverAI::getWaypointIndex() const
 
 bool HoverAI::hasCollided() const
 {
-	return collided;
+	return mCollided;
+}
+
+void HoverAI::resetWaypoint()
+{
+	waypointIndex = 0;
 }

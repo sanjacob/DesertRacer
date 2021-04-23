@@ -25,24 +25,27 @@ DesertCheckpoint::DesertCheckpoint(IModel* checkpointModel, NodeAlignment alignm
 	crossModel->Scale(kCrossScale);
 }
 
-bool DesertCheckpoint::collision(SVector2D position, const float collisionRadius)
+const string DesertCheckpoint::kDefaultModelName = "Checkpoint";
+
+Collision::CollisionAxis DesertCheckpoint::collision(SVector2D position, const float collisionRadius, bool saveAxis)
 {
 	SVector2D strutDistance = { kHalfLength, 0 };
 	if (mAlignment == zAligned)
 		strutDistance = { 0, kHalfLength };
 	SVector2D strutA = position2D() - strutDistance, strutB = position2D() + strutDistance;
 	
-	bool collisionA = Collision::circleToCircle(position, strutA, kStrutRadius, collisionRadius);
-	bool collisionB = Collision::circleToCircle(position, strutB, kStrutRadius, collisionRadius);
+	Collision::CollisionAxis collisionA = Collision::circleToCircle(position, strutA, kStrutRadius, collisionRadius);
+	Collision::CollisionAxis collisionB = Collision::circleToCircle(position, strutB, kStrutRadius, collisionRadius);
 
-	return collisionA + collisionB;
+	if (collisionA == Collision::CollisionAxis::Both || collisionB == Collision::CollisionAxis::Both)
+		return Collision::CollisionAxis::Both;
 }
 
 bool DesertCheckpoint::checkpointCollision(SVector2D position)
 {
 	if (mAlignment == zAligned)
-		return Collision::pointToBox(position, position2D(), kHalfWidth, kHalfLength);
-	return Collision::pointToBox(position, position2D(),  kHalfLength, kHalfWidth);
+		return Collision::pointToBox(position, position2D(), kHalfWidth, kHalfLength) == Collision::CollisionAxis::Both;
+	return Collision::pointToBox(position, position2D(), kHalfLength, kHalfWidth) == Collision::CollisionAxis::Both;
 }
 
 void DesertCheckpoint::setCrossed()

@@ -16,11 +16,13 @@
 #include "vector.h"
 #include "node.h"
 #include "camera.h"
+#include "vehicle.h"
+#include "particle.h"
 
 
 namespace desert
 {
-    class HoverCar : public SceneNodeContainer, public VectorBasedMovement
+    class HoverCar : public DesertVehicle
     {
     public:
         static enum BoostState
@@ -31,7 +33,9 @@ namespace desert
             Penalty
         };
 
-        HoverCar(tle::IModel* model, const SControlKeybinding carKeybinding);
+        static const std::string kDefaultModelName;
+
+        HoverCar(tle::IModel* model, const SControlKeybinding carKeybinding, tle::IMesh* flareMesh);
         ~HoverCar();
         void addCamera(DesertCamera cam);
         void control(tle::I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime);
@@ -43,14 +47,16 @@ namespace desert
         void controlCameras(tle::I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime);
         void reduceHealth(const int reduction = 1);
         void applyMovementVector();
-        void bounce();
+        void bounce(Collision::CollisionAxis reverse = Collision::Both);
         void reset();
+
+        SVector2D getMovementVector();
 
         tle::ICamera* getCamera();
         BoostState getBoostState() const;
         const float getCollisionRadius() const;
         int getHealth() const;
-        int getSpeed() const;
+        float getSpeed() const;
     protected:
         // Car forwards / backwards movement state
         enum HoverCarState
@@ -79,10 +85,14 @@ namespace desert
         const float kInitialRotation = 200.0f;
 
         // Movement vector is multiplied by drag every frame
-        const float kDrag = 0.96f;
+        const float kDrag = 0.92f;
         
         // Bouncing multiplier
         const float kBounce = 1.0f;
+
+        const float kWorldScale = 15;
+
+        const float kDragCutoff = 0.05;
 
         // BOOST //
 
@@ -102,7 +112,7 @@ namespace desert
         // Speed to reset Y position
         const float kResetYSpeed = 4.0f;
         // Modifies sin wave amplitude (aka bumpiness)
-        const float kSinFunctionMultiplier = 5.0f;
+        const float kSinFunctionMultiplier = 12.0f;
 
         // LEAN //
 

@@ -11,6 +11,7 @@
 
 #include <TL-Engine.h>
 #include "vector.h"
+#include "collision.h"
 
 
 namespace desert
@@ -51,11 +52,13 @@ namespace desert
 		*/
 		SVector2D getFacingVector2D() const;
 
+		float distanceTo(SVector2D point) const;
+
 		// Reset node's position to the one it had when the container was created
 		void resetPosition(bool x = true, bool y = true, bool z = true);
 		// Reset the node's local position to the one it had when the container was created
 		void resetLocalPosition(bool x = true, bool y = true, bool z = true);
-		
+		void setPositionByVector(SVector3D vector);
 		// Node movement & local movement
 		void moveByVector(SVector3D vector);
 		void moveByVector(SVector2D vector);
@@ -76,7 +79,6 @@ namespace desert
 
 		// The pointer to the TL-Engine ISceneNode
 		tle::ISceneNode* node;
-
 	};
 
 	/**
@@ -92,15 +94,26 @@ namespace desert
 		* @param position Vector containing position of other node
 		* @param collisionRadius Optional parameter for cases in which sphere collision is implemented
 		*/
-		virtual bool collision(SVector2D position, const float collisionRadius = 0.0f) = 0;
+		virtual Collision::CollisionAxis collision(SVector2D position, const float collisionRadius = 0.0f, bool saveAxis = false) = 0;
+		// Getter for mFixed
+		virtual bool isFixed();
+		virtual void modifyMovementVector(SVector2D change);
+		// Returns true if modifyMovementVector was called before
+		virtual bool vectorWasModified();
+		Collision::CollisionAxis getNewCollisionAxis();
+	protected:
+		void setNewCollisionAxis(Collision::CollisionAxis axis);
+		bool mFixed = true;
+		bool mVectorModified = false;
+		Collision::CollisionAxis mLastCollisionAxis = Collision::None, mNewCollisionAxis = Collision::None;
 	};
 
 	class SphereCollisionModel : public CollisionModel
 	{
 	public:
 		SphereCollisionModel(tle::IModel* m);
-		virtual bool collision(SVector2D position, const float collisionRadius = 0.0f);
-		virtual bool collision(SphereCollisionModel other);
+		virtual Collision::CollisionAxis collision(SVector2D position, const float collisionRadius = 0.0f, bool saveAxis = false);
+		virtual Collision::CollisionAxis collision(SphereCollisionModel other);
 		virtual int getCollisionRadius();
 	protected:
 		int mRadius;
@@ -110,8 +123,8 @@ namespace desert
 	{
 	public:
 		BoxCollisionModel(tle::IModel* m, NodeAlignment a);
-		virtual bool collision(SVector2D position, const float collisionRadius = 0.0f);
-		virtual bool collision(SphereCollisionModel other);
+		virtual Collision::CollisionAxis collision(SVector2D position, const float collisionRadius = 0.0f, bool saveAxis = false);
+		virtual Collision::CollisionAxis collision(SphereCollisionModel other);
 	protected:
 		float mHalfWidth, mHalfLength;
 		const NodeAlignment mAlignment;
@@ -122,7 +135,7 @@ namespace desert
 	{
 	public:
 		// Reverse movement vector
-		virtual void bounce() = 0;
+		virtual void bounce(Collision::CollisionAxis reverse = Collision::Both) = 0;
 		// Move node by current movement vector
 		virtual void applyMovementVector() = 0;
 	protected:

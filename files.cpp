@@ -29,7 +29,7 @@ vector<string> Files::getLinesFromFile(string filename)
     {
         while (getline(inputFile, line))
         {
-            if (line[0] != '/' || line[1] != '/') { lines.push_back(line); }
+            if ((line[0] != '/' || line[1] != '/') && line != "") { lines.push_back(line); }
         }
     }
     else

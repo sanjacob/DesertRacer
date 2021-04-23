@@ -23,6 +23,12 @@ namespace desert
     class DesertSprite
     {
     public:
+        // Data about a sprite
+        struct SSprite
+        {
+            std::string asset;
+            int w, h;
+        };
         // Horizontal sprite alignment
         enum ESpriteHAlignment
         {
@@ -93,7 +99,9 @@ namespace desert
         void setText(std::string t, int i);
         // Call draw method on every font on the sprite
         void drawText();
-
+        bool collision(SVector2D point);
+        SVector2D position2D();
+        tle::ISprite* getISPrite();
         
     protected:
         const int kWindowH, kWindowW;
@@ -138,14 +146,21 @@ namespace desert
         void setSpeedText(std::string text);
         // Sets lap indicator text
         void setLapText(std::string text);
+        // Set place
+        void setRacePosition(int position);
+        void setSummaryWinner(std::string text);
+        void setSummaryTime(std::string text);
         // Toggles lap sprite visibility
         void toggleLapSprite(bool on);
+        void togglePosition(bool on);
+        void toggleSummary(bool on);
+
         // Toggles boost indicator visibility
-        void toggleBoostIndicator(bool on);
+        void toggleBoost(bool on);
         // Toggles boost warning indicator visibility
-        void toggleWarnIndicator(bool on);
+        void toggleWarning(bool on);
         // Toggles overheated boost indicator visibility
-        void toggleOverheatWarning(bool on);
+        void toggleOverheat(bool on);
         // Returns the ordinal part for a number (e.g. 1 -> 'st', 2 -> 'nd', and so on)
         static std::string racePlaceAsString(int place);
 
@@ -155,26 +170,20 @@ namespace desert
             std::string fontFamily;
             int fontSize;
         };
-
-        // Data about a sprite
-        struct SSprite
-        {
-            std::string asset;
-            int w, h;
-        };
     protected:
         // Backdrop folder
         const std::string kAssetsFolder = "backdrops\\";
 
         // All assets data
-        const SSprite tuxAsset = { "tux.png", 700, 60 };
-        const SSprite goalAsset = { "goal.png", 700, 60 };
-        const SSprite lapAsset = { "lap.png", 158, 55 };
-        const SSprite speedAsset  = { "combined.png", 158, 55 };
-        const SSprite placeAsset = { "place.png", 180, 180 };
-        const SSprite boostAsset  = { "boost.png", 158, 55 };
-        const SSprite warnAsset = { "warn.png", 158, 55 };
-        const SSprite overheatAsset = { "overheat.png", 158, 55 };
+        const DesertSprite::SSprite tuxAsset = { "tux.png", 700, 60 };
+        const DesertSprite::SSprite goalAsset = { "goal.png", 700, 60 };
+        const DesertSprite::SSprite lapAsset = { "lap.png", 158, 55 };
+        const DesertSprite::SSprite speedAsset  = { "combined.png", 158, 55 };
+        const DesertSprite::SSprite placeAsset = { "place.png", 180, 180 };
+        const DesertSprite::SSprite boostAsset  = { "boost.png", 158, 55 };
+        const DesertSprite::SSprite warnAsset = { "warn.png", 158, 55 };
+        const DesertSprite::SSprite overheatAsset = { "overheat.png", 158, 55 };
+        const DesertSprite::SSprite summaryAsset = { "end.png", 500, 200 };
 
         // Font data
         const SFontData mainFont = { "Comic Sans MS", 32 };
@@ -188,6 +197,7 @@ namespace desert
 
         DesertSprite *mTuxSprite, *mGoalSprite, *mLapSprite, *mSpeedSprite, *mPlaceSprite;
         DesertSprite *mBoostSprite, *mWarnSprite, *mOverheatSprite;
+        DesertSprite *mSummarySprite;
 
         DesertSprite::ESpriteState mState;
 

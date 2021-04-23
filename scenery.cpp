@@ -24,13 +24,31 @@ DesertWall::~DesertWall()
 	cout << position2D().asString() << endl;
 }
 
-DesertTank::DesertTank(IModel* m) : SphereCollisionModel(m)
+const string DesertWall::kDefaultModelName = "Wall";
+
+DesertTower::DesertTower(IModel* m, NodeAlignment alignment) : BoxCollisionModel(m, alignment)
 {
-	mRadius = kCollisionRadius;
+	mHalfWidth = kHalfWidth;
+	mHalfLength = kHalfLength;
+	cout << "DesertTower created" << endl;
+}
+
+DesertTower::~DesertTower()
+{
+	cout << "DesertTower destroyed at ";
+	cout << position2D().asString() << endl;
+}
+
+const string DesertTower::kDefaultModelName = "Tower";
+
+CustomSphereCModel::CustomSphereCModel(IModel* m, const float radius) : SphereCollisionModel(m)
+{
+	mRadius = radius;
 	cout << "DesertTank created" << endl;
 }
 
-DesertTank::~DesertTank()
+CustomSphereCModel::~CustomSphereCModel()
 {
-	cout << "DesertTank destroyed" << endl;
+	cout << "Snowman destroyed" << endl;
 }
+

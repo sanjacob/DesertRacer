@@ -9,6 +9,7 @@
 #include <TL-Engine.h>
 #include <iostream>
 #include "ui.h"
+#include "collision.h"
 
 using namespace tle;
 using namespace desert;
@@ -50,6 +51,8 @@ DesertSprite::DesertSprite(ISprite* s, int windowW, int windowH, int w, int h, E
 	y = s->GetY() + (h / 2);
 }
 
+
+
 void DesertSprite::toggle(bool show)
 {
 	if (show)
@@ -83,6 +86,21 @@ void DesertSprite::drawText()
 			t.font->Draw(t.text, x + t.textXOffset, y + t.textYOffset, t.colour, t.hTextAlign, t.vTextAlign);
 		}
 	}
+}
+
+SVector2D DesertSprite::position2D()
+{
+	return { static_cast<float>(x), static_cast<float>(y) };
+}
+
+bool DesertSprite::collision(SVector2D point)
+{
+	return (Collision::pointToBox(point, position2D(), (w / 2), (h / 2)) == Collision::Both);
+}
+
+ISprite* DesertSprite::getISPrite()
+{
+	return mSprite;
 }
 
 GameUI::GameUI(I3DEngine* myEngine) : kWindowH(myEngine->GetHeight()), kWindowW(myEngine->GetWidth())
@@ -128,10 +146,15 @@ GameUI::GameUI(I3DEngine* myEngine) : kWindowH(myEngine->GetHeight()), kWindowW(
 	mPlaceSprite->addFont(biggerFont, -doubleUnit - smallUnit, -reallyBigUnit, placeColour, kCentre, kTop);
 	mPlaceSprite->addFont(bigFont, doubleUnit + smallUnit, -reallyBigUnit + smallUnit, placeColour, kCentre, kTop);
 
+	ISprite* summaryISprite = myEngine->CreateSprite(kAssetsFolder + summaryAsset.asset, kWindowW / 2, kWindowH / 2);
+	mSummarySprite = new DesertSprite(summaryISprite, kWindowW, kWindowH, summaryAsset.w, summaryAsset.h, DesertSprite::Left, DesertSprite::Bottom);
+	mSummarySprite->addFont(defaultIFont, 0, -20, kWhite, kCentre, kVCentre);
+	mSummarySprite->addFont(littleFont, 0, +40, kWhite, kCentre, kVCentre);
+
 	mSpeedSprite->setText("88 mi/h", 1);
-	mPlaceSprite->setText("2", 0);
-	mPlaceSprite->setText(racePlaceAsString(2), 1);
+	mPlaceSprite->toggle(false);
 	mGoalSprite->toggle(false);
+	mSummarySprite->toggle(false);
 }
 
 GameUI::~GameUI()
@@ -145,8 +168,20 @@ GameUI::~GameUI()
 	delete mBoostSprite;
 	delete mWarnSprite;
 	delete mOverheatSprite;
+	delete mSummarySprite;
 
-	mTuxSprite = mGoalSprite = mLapSprite = mSpeedSprite = mPlaceSprite = mBoostSprite = mWarnSprite = mOverheatSprite = nullptr;
+	mTuxSprite = mGoalSprite = mLapSprite = mSpeedSprite = mPlaceSprite = mBoostSprite = mWarnSprite = mOverheatSprite = mSummarySprite = nullptr;
+}
+
+void GameUI::setRacePosition(int position)
+{
+	mPlaceSprite->setText(to_string(position), 0);
+	mPlaceSprite->setText(racePlaceAsString(position), 1);
+}
+
+void GameUI::togglePosition(bool on)
+{
+	mPlaceSprite->toggle(on);
 }
 
 string GameUI::racePlaceAsString(int place)
@@ -202,6 +237,16 @@ void GameUI::setSpeedText(string text)
 	mSpeedSprite->setText(text, 1);
 }
 
+void GameUI::setSummaryWinner(string text)
+{
+	mSummarySprite->setText(text, 0);
+}
+
+void GameUI::setSummaryTime(string text)
+{
+	mSummarySprite->setText(text, 1);
+}
+
 void GameUI::drawGameUI(const float kDeltaTime)
 {
 	if (mState == DesertSprite::ESpriteState::Shown) {
@@ -224,6 +269,7 @@ void GameUI::drawGameUI(const float kDeltaTime)
 	mLapSprite->drawText();
 	mSpeedSprite->drawText();
 	mPlaceSprite->drawText();
+	mSummarySprite->drawText();
 }
 
 void GameUI::toggleLapSprite(bool on)
@@ -231,17 +277,22 @@ void GameUI::toggleLapSprite(bool on)
 	mLapSprite->toggle(on);
 }
 
-void GameUI::toggleBoostIndicator(bool on)
+void GameUI::toggleBoost(bool on)
 {
 	mBoostSprite->toggle(on);
 }
 
-void GameUI::toggleWarnIndicator(bool on)
+void GameUI::toggleWarning(bool on)
 {
 	mWarnSprite->toggle(on);
 }
 
-void GameUI::toggleOverheatWarning(bool on)
+void GameUI::toggleOverheat(bool on)
 {
 	mOverheatSprite->toggle(on);
+}
+
+void GameUI::toggleSummary(bool on)
+{
+	mSummarySprite->toggle(on);
 }

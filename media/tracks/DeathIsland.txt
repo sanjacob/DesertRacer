@@ -1,0 +1,51 @@
+// Checkpoints
+Checkpoint 0 0 0
+Checkpoint 50 200 0
+Checkpoint 100 400 0
+Checkpoint 250 500 90
+Checkpoint 400 400 0
+Checkpoint 500 0 0
+Checkpoint 250 -100 90
+
+
+// World
+Skybox 0 0 0 -960
+LavaGround 0 0 0
+Racecar -10 -40 0
+Cube 1000 0 0 5
+
+// Waypoints / AI
+Dummy 0 25 0
+Dummy 32 90 0
+Dummy 50 190 0
+Dummy 49 205 0
+Dummy 43 255 0
+Dummy 100 355 0
+Dummy 98 400 0
+Dummy 238 498 0
+Dummy 264 496 0
+Dummy 398 404 0
+Dummy 450 210 0
+Dummy 452 185 0
+Dummy 500 15 0
+Dummy 498 -16 0
+Dummy 258 -100 0
+Dummy 233 -100 0
+Dummy 0 -10 0
+Racecar 0 -40 0
+Racecar 10 -60 0
+Racecar 20 -80 0
+
+// Perimeter
+TankSmall1 60 -80 0
+TankSmall2 -60 -80 0
+TankSmall2 60 180 0
+TankSmall1 -60 180 0
+TankSmall1 60 60 0
+TankSmall2 -60 60 0
+
+// Obstacle
+TankSmall2 35 -4 0 -5 0 -20
+
+//Grid 0 0 0 0.1
+Moon 250 150 0
