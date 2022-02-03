@@ -181,57 +181,57 @@ template AnimationSet {
 
 template XSkinMeshHeader {
  <3CF169CE-FF7C-44ab-93C0-F78F62D172E2>
- WORD nMaxSkinWeightsPerVertex; 
- WORD nMaxSkinWeightsPerFace; 
- WORD nBones; 
+ WORD nMaxSkinWeightsPerVertex;
+ WORD nMaxSkinWeightsPerFace;
+ WORD nBones;
 }
 
 template VertexDuplicationIndices {
  <B8D65549-D7C9-4995-89CF-53A9A8B031E3>
- DWORD nIndices; 
- DWORD nOriginalVertices; 
- array DWORD indices[nIndices]; 
+ DWORD nIndices;
+ DWORD nOriginalVertices;
+ array DWORD indices[nIndices];
 }
 
 template SkinWeights {
  <6F0D123B-BAD2-4167-A0D0-80224F25FABB>
  STRING transformNodeName;
- DWORD nWeights; 
- array DWORD vertexIndices[nWeights]; 
- array float weights[nWeights]; 
- Matrix4x4 matrixOffset; 
+ DWORD nWeights;
+ array DWORD vertexIndices[nWeights];
+ array float weights[nWeights];
+ Matrix4x4 matrixOffset;
 }
 
 template FVFData {
  <b6e70a0e-8ef9-4e83-94ad-ecc8b0c04897>
- DWORD dwFVF; 
- DWORD nDWords; 
- array DWORD data[nDWords]; 
+ DWORD dwFVF;
+ DWORD nDWords;
+ array DWORD data[nDWords];
 }
 
 template EffectInstance {
  <e331f7e4-0559-4cc2-8e99-1cec1657928f>
- STRING EffectFilename; 
- [...] 
+ STRING EffectFilename;
+ [...]
 }
 
 template EffectParamFloats {
  <3014b9a0-62f5-478c-9b86-e4ac9f4e418b>
- STRING ParamName; 
- DWORD nFloats; 
- array FLOAT Floats[nFloats]; 
+ STRING ParamName;
+ DWORD nFloats;
+ array FLOAT Floats[nFloats];
 }
 
 template EffectParamString {
  <1dbc4c88-94c1-46ee-9076-2c28818c9481>
- STRING ParamName; 
- STRING Value; 
+ STRING ParamName;
+ STRING Value;
 }
 
 template EffectParamDWord {
  <e13963bc-ae51-4c5d-b00f-cfa3a9d97ce5>
- STRING ParamName; 
- DWORD Value; 
+ STRING ParamName;
+ DWORD Value;
 }
 
 Header {
@@ -260,25 +260,25 @@ Material material01 {
 // Top-most frame encompassing the 'World'
 Frame Frame_World {
 	FrameTransformMatrix {
-		1.000000, 0.0, 0.0, 0.0, 
-		0.0, 1.000000, 0.0, 0.0, 
-		0.0, 0.0, -1.000000, 0.0, 
+		1.000000, 0.0, 0.0, 0.0,
+		0.0, 1.000000, 0.0, 0.0,
+		0.0, 0.0, -1.000000, 0.0,
 		0.0, 0.0, 0.0, 1.000000;;
 	}
 
 Frame Frame_spaceship02commandmodule01 {
 	FrameTransformMatrix {
-		1.346743, 0.0, 0.0, 0.0, 
-		0.0, 1.346743, 0.0, 0.0, 
-		0.0, 0.0, 1.346743, 0.0, 
+		1.346743, 0.0, 0.0, 0.0,
+		0.0, 1.346743, 0.0, 0.0,
+		0.0, 0.0, 1.346743, 0.0,
 		-0.000006, -0.562177, 0.118152, 1.000000;;
 	}
 
 Frame Frame_Spaceship01 {
 	FrameTransformMatrix {
-		0.0, 0.0, 0.018413, 0.0, 
-		-0.018413, 0.0, 0.0, 0.0, 
-		0.0, -0.018413, 0.0, 0.0, 
+		0.0, 0.0, 0.018413, 0.0,
+		-0.018413, 0.0, 0.0, 0.0,
+		0.0, -0.018413, 0.0, 0.0,
 		-0.000108, -0.145346, -0.087083, 1.000000;;
 	}
 
