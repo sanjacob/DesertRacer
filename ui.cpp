@@ -17,7 +17,7 @@ using namespace desert;
 
 DesertSprite::DesertSprite(ISprite* s, int windowW, int windowH, int w, int h, ESpriteHAlignment wAlign, ESpriteVAlignment hAlign) : mSprite(s), kWindowW(windowW), kWindowH(windowH), w(w), h(h)
 {
-	// Realign sprite horizontally 
+	// Realign sprite horizontally
 	switch (wAlign)
 	{
 	case DoubleLeft:
@@ -140,7 +140,7 @@ GameUI::GameUI(I3DEngine* myEngine) : kWindowH(myEngine->GetHeight()), kWindowW(
 	mSpeedSprite = new DesertSprite(speedISprite, kWindowW, kWindowH, speedAsset.w, speedAsset.h, DesertSprite::DoubleLeft, DesertSprite::DoubleBottom);
 	mSpeedSprite->addFont(littleFont, 0, -smallUnit, kBlack, kRight, kVCentre);
 	mSpeedSprite->addFont(littleFont, 0, smallUnit, kBlack, kCentre, kVCentre);
-	
+
 	ISprite* placeISprite = myEngine->CreateSprite(kAssetsFolder + placeAsset.asset, kPadding, kPadding);
 	mPlaceSprite = new DesertSprite(placeISprite, kWindowW, kWindowH, placeAsset.w, placeAsset.h, DesertSprite::HCentre, DesertSprite::VCentre);
 	mPlaceSprite->addFont(biggerFont, -doubleUnit - smallUnit, -reallyBigUnit, placeColour, kCentre, kTop);

@@ -51,4 +51,3 @@ CustomSphereCModel::~CustomSphereCModel()
 {
 	cout << "Snowman destroyed" << endl;
 }
-

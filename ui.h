@@ -102,7 +102,7 @@ namespace desert
         bool collision(SVector2D point);
         SVector2D position2D();
         tle::ISprite* getISPrite();
-        
+
     protected:
         const int kWindowH, kWindowW;
         const int h, w;

@@ -50,7 +50,7 @@ TLtendoStartup::TLtendoStartup(tle::I3DEngine* myEngine)
 
 void TLtendoStartup::remove(I3DEngine* myEngine)
 {
-	
+
 	if (!testing)
 	{
 		for (IModel* afterImg : afterimages)

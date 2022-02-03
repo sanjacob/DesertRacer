@@ -119,7 +119,7 @@ const int SceneNodeContainer::kAxisDegrees = 180;
 
 NodeAlignment SceneNodeContainer::getAlignmentFromRotation(int rotation)
 {
-	switch (rotation % kAxisDegrees) 
+	switch (rotation % kAxisDegrees)
 	{
 	case 0:
 		return xAligned;
@@ -200,7 +200,7 @@ Collision::CollisionAxis BoxCollisionModel::collision(SphereCollisionModel other
 {
 	mVectorModified = false;
 	Collision::CollisionAxis axis;
-	
+
 	if (mAlignment == zAligned)
 	{
 		axis = Collision::circleToBox(other.position2D(), other.getCollisionRadius(), position2D(), mHalfLength, mHalfWidth);

@@ -33,7 +33,7 @@ Collision::CollisionAxis DesertCheckpoint::collision(SVector2D position, const f
 	if (mAlignment == zAligned)
 		strutDistance = { 0, kHalfLength };
 	SVector2D strutA = position2D() - strutDistance, strutB = position2D() + strutDistance;
-	
+
 	Collision::CollisionAxis collisionA = Collision::circleToCircle(position, strutA, kStrutRadius, collisionRadius);
 	Collision::CollisionAxis collisionB = Collision::circleToCircle(position, strutB, kStrutRadius, collisionRadius);
 

@@ -27,7 +27,7 @@ struct VS_Output
 {
 	float4 Position      : POSITION;
 	float2 TexCoord0     : TEXCOORD0;
-	float3 WorldPosition : TEXCOORD1; // Use TEXCOORD semantic for non-standard data - see above 
+	float3 WorldPosition : TEXCOORD1; // Use TEXCOORD semantic for non-standard data - see above
 	float3 Normal        : TEXCOORD2;
 };
 
@@ -38,17 +38,17 @@ struct VS_Output
 // Main vertex shader function. Basic shader that also passes world-space position and normal
 // on to the pixel shader
 
-void main( in VS_Input i, out VS_Output o ) 
+void main( in VS_Input i, out VS_Output o )
 {
     // Transform model vertex position to world space, then to viewport space. Pass both forms on
     // to the pixel shader
-    float3 WorldPosition = mul( float4(i.Position, 1.0f), WorldMatrix );         
+    float3 WorldPosition = mul( float4(i.Position, 1.0f), WorldMatrix );
     o.Position = mul( float4(WorldPosition, 1.0f), ViewProjMatrix );
     o.WorldPosition = WorldPosition;
 
     // Transform model normal to world space and pass to the pixel shader
     o.Normal = mul( i.Normal, (float3x3)WorldMatrix );
-    
+
     // Pass texture coordinates directly to pixel shader
     o.TexCoord0 = i.TexCoord0;
 }

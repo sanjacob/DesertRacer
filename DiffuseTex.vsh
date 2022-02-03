@@ -44,7 +44,7 @@ struct VS_Output
 //-----------------------------------------------------------------------------
 
 // Main vertex shader function
-void main( in VS_Input i, out VS_Output o ) 
+void main( in VS_Input i, out VS_Output o )
 {
 	// Can change colour + intensity of light
 	const float3 AmbientColour = { 0.3f, 0.3f, 0.3f };
@@ -52,10 +52,10 @@ void main( in VS_Input i, out VS_Output o )
 
 	// Probably changes position of light source + intensity
 	const float3 DirToLight = { 0.408f, 0.408f, -0.816 };
-	
+
 	// The lower the brighter
 	const float SpecularPower = 30.0f;
-	
+
     // Transform model vertex position to world space, then to viewport space, then output it
 	float4 newPosition = float4(i.Position, 1.0f);
     float3 WorldPosition = mul( newPosition, WorldMatrix );
@@ -71,7 +71,7 @@ void main( in VS_Input i, out VS_Output o )
 	float3 DirToCamera = normalize( CameraPosition - WorldPosition );
 	float3 H = normalize( DirToCamera + DirToLight );
 	float3 SpecularColour = LightColour * pow( saturate( dot(Normal, H) ), SpecularPower ); // Phong
-	
+
 	o.DiffuseColour = DiffuseColour;
 	o.SpecularColour = SpecularColour;
 	o.TexCoord0 = i.TexCoord0;

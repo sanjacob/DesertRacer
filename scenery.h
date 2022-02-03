@@ -1,6 +1,6 @@
 /**
  * @file scenery.h
- * Provides classes for 
+ * Provides classes for
  *
  * @author Jacob Sanchez Perez (G20812080) <jsanchez-perez@uclan.ac.uk>
  * Games Concepts (CO1301), University of Central Lancashire
@@ -45,4 +45,3 @@ namespace desert {
 };
 
 #endif
-

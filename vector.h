@@ -38,7 +38,7 @@ namespace desert
 
 		SVector3D() {};
 		SVector3D(float xComp, float yComp, float zComp) : x(xComp), y(yComp), z(zComp) {};
-		
+
 		// Vector negation
 		SVector3D operator-() const
 		{
@@ -56,7 +56,7 @@ namespace desert
 		{
 			return { x - other.x, y - other.y, z - other.z };
 		}
-		
+
 		// Vector multiplication
 		SVector3D operator*(const SVector3D& other) const
 		{

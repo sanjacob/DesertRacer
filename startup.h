@@ -74,7 +74,7 @@ namespace desert
 
 
         // Movement Variables //
-        
+
         // Keep track of current model rotation
         float modelRotation = 0;
 

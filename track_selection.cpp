@@ -39,7 +39,7 @@ TrackSelection::TrackSelection(I3DEngine* myEngine, EKeyCode trackSelectKey) : k
 		}
 		h += rowH;
 	}
-	
+
 	ISprite* bgSprite = myEngine->CreateSprite(kAssetsFolder + bgAsset.asset, kWindowW / 2, kWindowH / 2, -1);
 	mBackground = new DesertSprite(bgSprite, kWindowW, kWindowH, bgAsset.w, bgAsset.h, DesertSprite::ESpriteHAlignment::Left, DesertSprite::ESpriteVAlignment::Bottom);
 }
@@ -84,4 +84,3 @@ int TrackSelection::updateScene(I3DEngine* myEngine)
 
 	return -1;
 }
-

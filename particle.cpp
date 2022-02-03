@@ -97,13 +97,13 @@ void ParticleSystem::updateSystem(const float kDeltaTime, const SVector3D newPos
 				}
 			}
 		}
-		
+
 		/*if (p.container.position2D().y < minY)
 		{
 			p.velocity = mInitialVelocity + p.randomisation;
 		}*/
 	}
-	
+
 	if (mParticles.size() < mNumParticles)
 	{
 		createParticles(mParticleSteps);

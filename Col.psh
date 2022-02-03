@@ -15,7 +15,7 @@ struct PS_Output
 };
 
 // Main pixel shader function
-void main( in PS_Input i, out PS_Output o ) 
+void main( in PS_Input i, out PS_Output o )
 {
     o.Colour = float4( i.Colour, 1.0f );
 }

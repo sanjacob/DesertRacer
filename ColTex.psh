@@ -34,7 +34,7 @@ struct PS_Output
 };
 
 // Main pixel shader function
-void main( in PS_Input i, out PS_Output o ) 
+void main( in PS_Input i, out PS_Output o )
 {
 	// Multiply texture contents by diffuse and specular colours and add them together
 	o.Colour = float4( i.Colour1, 1.0f ) * tex2D( Tex0, i.TexCoord0 ) + float4( i.Colour2, 1.0f ) * tex2D(Tex0, i.TexCoord0);
