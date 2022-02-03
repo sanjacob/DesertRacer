@@ -32,7 +32,7 @@ HoverCar::~HoverCar()
 }
 
 void HoverCar::addCamera(DesertCamera cam)
-{	
+{
 	if (!cameras.size())
 	{
 		cam.setActive();
@@ -67,7 +67,7 @@ float HoverCar::processBoost(tle::I3DEngine* myEngine, const float kDeltaTime)
 		// Health needs to be above a certain limit for the boost to work
 		if (myEngine->KeyHeld(mKeybind.kBoost) && health > kBoostMinimumHealth)
 		{
-			// 
+			//
 			boostTimer += kDeltaTime;
 
 			if (boostTimer >= kBoostMaxTimeActive)
@@ -107,7 +107,9 @@ void HoverCar::processThrust(tle::I3DEngine* myEngine, const float frameSpeed, c
 	// Move Forwards / Backwards
 	if (myEngine->KeyHeld(mKeybind.kForwardThrust))
 	{
-		movementThisFrame += getFacingVector2D() * (frameSpeed * kThrust * boostMultiplier);
+		movementThisFrame += getFacingVector2D() * (kThrustVector * frameSpeed * boostMultiplier);
+		//cout << getFacingVector2D().asString() << endl;
+		//cout << getFacingVector().asString() << endl;
 		carState = Moving;
 
 		float currentLiftSpeed = (kRearLiftSpeed * frameSpeed);
@@ -120,7 +122,7 @@ void HoverCar::processThrust(tle::I3DEngine* myEngine, const float frameSpeed, c
 	}
 	else if (myEngine->KeyHeld(mKeybind.kBackwardsThrust))
 	{
-		movementThisFrame += getFacingVector2D() * (frameSpeed * kThrust * kBackwardThrustMultiplier * boostMultiplier);
+		movementThisFrame += getFacingVector2D() * (kThrustVector * frameSpeed * kBackwardThrustMultiplier * boostMultiplier);
 		//node->MoveLocalZ(-kThrust * kBackwardThrustMultiplier * frameGameSpeed);
 		carState = Moving;
 	}
@@ -202,7 +204,7 @@ void HoverCar::processBobble(const float kGameSpeed, const float kDeltaTime)
 			{
 				node->SetY(kModelYOffset);
 			}
-			
+
 			timeElapsedMoving = 0;
 		}
 
@@ -269,9 +271,9 @@ void HoverCar::reduceHealth(const int reduction)
 	}
 }
 
-void HoverCar::applyMovementVector()
+void HoverCar::applyMovementVector(const float kDeltaTime)
 {
-	moveByVector(movementThisFrame);
+	moveByVector(movementThisFrame * kDeltaTime);
 	movementThisFrame *= (kDrag * boostDragMultiplier);
 	if (movementThisFrame.length() < kDragCutoff)
 	{
@@ -334,5 +336,6 @@ int HoverCar::getHealth() const
 float HoverCar::getSpeed() const
 {
 	SVector2D scaledVector = movementThisFrame;
+	cout << scaledVector.length() << endl;
 	return scaledVector.length() * kWorldScale;
 }

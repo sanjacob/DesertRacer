@@ -32,7 +32,7 @@ using namespace desert;
 DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 {
 	// Choose keybinds
-	const SControlKeybinding controlKeybind = kDefaultDvorakBind.kControlKeybind;
+	const SControlKeybinding controlKeybind = kDefaultQwertyBind.kControlKeybind;
 
 	// Get setup file lines
 	vector<string> setupLines = Files::getLinesFromFile(sceneSetupFilename);
@@ -47,7 +47,7 @@ DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 	flareMesh = myEngine->LoadMesh(kFlareMeshFilename);
 
 	bool playerLoaded = false;
-	
+
 	// For every model in scene
 	for (string setupLine : setupLines)
 	{
@@ -124,7 +124,7 @@ DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 
 	// Create UI
 	uiPtr = new GameUI(myEngine);
-	
+
 	// Initialise UI elements
 	resetDialog();
 	updateUI();
@@ -259,7 +259,7 @@ void DesertRacetrack::updateScene(I3DEngine* myEngine, const float kGameSpeed, c
 			// timeElapsed to be zero this subtraction is needed
 			timeElapsed = -kDeltaTime;
 		}
-		
+
 		// Add time to counter
 		timeElapsed += kDeltaTime;
 	}
@@ -404,7 +404,7 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 
 	// Checkpoint crossing detection & handling
 	detectCheckpointCrossings(kDeltaTime);
-	 
+
 	// Sort vehicles by their race position
 	sort(mVehicles.begin(), mVehicles.end(), &DesertVehicle::compare);
 
@@ -419,9 +419,9 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 	/** First, detect collision for
 	* - Player
 	* - AI
-	* 
+	*
 	* Against
-	* 
+	*
 	* - Walls
 	* - Tanks
 	* - Struts of checkpoints
@@ -439,7 +439,7 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 
 			if (!node->isFixed())
 			{
-				node->modifyMovementVector(racecarPtr->getMovementVector());
+				node->modifyMovementVector(racecarPtr->getMovementVector() * kDeltaTime);
 			}
 		}
 
@@ -473,7 +473,7 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 	}
 
 	// After possibly cancelling movement vector out, apply result
-	racecarPtr->applyMovementVector();
+	racecarPtr->applyMovementVector(kDeltaTime);
 
 	// Handle AI collisions
 	for (HoverAI* hoverAI : mAI)
@@ -529,7 +529,7 @@ int DesertRacetrack::getStagesNumber() const
 // UI
 ////////////////////
 
-void DesertRacetrack::updateUI(float kDeltaTime)
+void DesertRacetrack::updateUI()
 {
 	// Hide all boost indicators
 	uiPtr->toggleBoost(false);
@@ -553,15 +553,11 @@ void DesertRacetrack::updateUI(float kDeltaTime)
 	}
 
 
-	// To get km/h
-	// Get number of frames in one second
-	const float fps = 1 / kDeltaTime;
-	
 	// Multiply by the seconds in an hour to get frames in an hour
 	// Then by racecar speed
 	float speedInKm = (racecarPtr->getSpeed() / kMetersInKm);
 	//cout << speedInKm << endl;
-	const int kmPerH = fps * kSecsInAnHour * speedInKm;
+	const int kmPerH = kSecsInAnHour * speedInKm;
 
 	// Update speed
 	uiPtr->setSpeedText(to_string(kmPerH) + "km/h");

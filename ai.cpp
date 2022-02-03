@@ -67,7 +67,6 @@ bool HoverAI::updateScene(const float kGameSpeed, const float kDeltaTime, const 
 	// If car is after some target
 	if (currentTargetNode != nullptr)
 	{
-		cout << rubberThrust << endl;
 		float frameTiming = kGameSpeed * kDeltaTime;
 		node->LookAt(currentTargetNode);
 
@@ -85,7 +84,7 @@ void HoverAI::modifyMovementVector(SVector2D change)
 	mVectorModified = true;
 }
 
-void HoverAI::applyMovementVector()
+void HoverAI::applyMovementVector(const float kDeltaTime)
 {
 	// Apply movement vector, drag
 	moveByVector(movementThisFrame);

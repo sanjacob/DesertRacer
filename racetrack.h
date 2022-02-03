@@ -47,7 +47,7 @@ namespace desert
         ~DesertRacetrack();
         // Choose the correct object type for each model loaded
         void handleModel(tle::IModel* model, std::string type, NodeAlignment alignment);
-        /** 
+        /**
         * Setup next frame of scene
         * This includes handling user input, detecting collisions, etc
         * @param myEngine Pointer to running instance of TL-Engine
@@ -78,7 +78,7 @@ namespace desert
         void updateOngoingRaceScene(tle::I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime);
 
         // Update UI based on current racecar status (boost indicators, speed)
-        void updateUI(float kDeltaTime = 1.0f);
+        void updateUI();
         // Update health (only called when car is damaged)
         void updateHealthInUI();
         // Update laps (only called when car completes a lap)
@@ -107,15 +107,15 @@ namespace desert
 
         // Number of seconds to countdown before race starts
         const int kSecondsBeforeRace = 3;
-        
+
         // Total number of laps
         const int kLaps = 3;
 
         const int kSecsInAnHour = 60 * 60;
         const int kMetersInKm = 1000;
 
-        const tle::EKeyCode kFollowCamKey = Key_1;
-        const tle::EKeyCode kPovCamKey = Key_2;
+        const tle::EKeyCode kFollowCamKey = tle::Key_1;
+        const tle::EKeyCode kPovCamKey = tle::Key_2;
 
         const int kSetupXIndex = 1;
         const int kSetupZIndex = 2;
@@ -147,7 +147,7 @@ namespace desert
             "ai_purple.png",
             "ai_teal.png"
         };
- 
+
         // Don't load a mesh twice
         std::unordered_map<std::string, tle::IMesh*> mMeshes;
         // Checkpoints

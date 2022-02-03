@@ -46,7 +46,7 @@ namespace desert
         void processBobble(const float kGameSpeed, const float kDeltaTime);
         void controlCameras(tle::I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime);
         void reduceHealth(const int reduction = 1);
-        void applyMovementVector();
+        void applyMovementVector(const float kDeltaTime);
         void bounce(Collision::CollisionAxis reverse = Collision::Both);
         void reset();
 
@@ -78,7 +78,7 @@ namespace desert
         // MOVEMENT //
 
         // Thrust speed
-        const float kThrust = 5.0f;
+        const SVector2D kThrustVector = { 140.0f, 140.0f };
         // Multiplier when using backwards thrust
         const float kBackwardThrustMultiplier = -0.5;
         // Rotation speed
@@ -86,11 +86,11 @@ namespace desert
 
         // Movement vector is multiplied by drag every frame
         const float kDrag = 0.92f;
-        
+
         // Bouncing multiplier
         const float kBounce = 1.0f;
 
-        const float kWorldScale = 15;
+        const float kWorldScale = 0.5;
 
         const float kDragCutoff = 0.05;
 
@@ -101,10 +101,10 @@ namespace desert
 
         // Boost maximum continuous use, time penalty and warning period
         const float kBoostMaxTimeActive = 3.0f, kBoostTimePenalty = 5.0f, kBoostWarningTime = 1.0f;
-        
+
         // Minimum health to use boost
         const float kBoostMinimumHealth = 30.0f;
-        
+
         // SIN WAVE //
 
         // Initial Y Offset
@@ -122,16 +122,16 @@ namespace desert
         const float kResetLeanSpeed = 30.0f;
         // Max leaning angle
         const float kMaxInclination = 20.0f;
-        
+
         // REAR LIFT //
-    
+
         // Speed at which rear is lifted
         const float kRearLiftSpeed = 5.0f;
         // Speed at which rear lift is reset (resetted?)
         const float kResetRearSpeed = 5.0f;
         // Max rear lift angle
         const float kMaxRearLift = 10.0f;
-        
+
         // HEALTH //
 
         // Initial health

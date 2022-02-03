@@ -1,8 +1,8 @@
 /**
  * @file ai.h
- * 
+ *
  * Non player-hover cars that follow waypoints.
- * 
+ *
  * Now with rubberbanding!
  *
  * @author Jacob Sanchez Perez (G20812080) <jsanchez-perez@uclan.ac.uk>
@@ -43,10 +43,10 @@ namespace desert {
 		* @param kDeltaTime Time elapsed since last frame
 		*/
 		bool updateScene(const float kGameSpeed, const float kDeltaTime, const float distanceToPlayer, bool ahead);
-		
+
 		void modifyMovementVector(SVector2D change);
 		// Move model by movement vector
-		void applyMovementVector();
+		void applyMovementVector(const float kDeltaTime = 1);
 		// Reverse movement vector
 		void bounce(Collision::CollisionAxis reverse = Collision::Both);
 		// Stop following any target
@@ -86,7 +86,7 @@ namespace desert {
 
 		const float kInvTime = 5;
 		float mInvTimer = 0;
-		
+
 
 		tle::ISceneNode* currentTargetNode = nullptr;
 	};

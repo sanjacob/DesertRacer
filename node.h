@@ -137,7 +137,7 @@ namespace desert
 		// Reverse movement vector
 		virtual void bounce(Collision::CollisionAxis reverse = Collision::Both) = 0;
 		// Move node by current movement vector
-		virtual void applyMovementVector() = 0;
+		virtual void applyMovementVector(const float kDeltaTime = 1.0f) = 0;
 	protected:
 		// Store movement vector
 		SVector2D movementThisFrame;
