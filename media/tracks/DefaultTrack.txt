@@ -1,62 +1,70 @@
-// Default Walls
+/// DEFAULT SCENERY ///
+
+// CHECKPOINTS
+Checkpoint 0 0 0
+Checkpoint 10 120 90
+Checkpoint 25 56 0
+Checkpoint 40 -30 0
+
+// WALL SECTIONS
+
+// Section 1
 IsleStraight -10 40 0
 Wall -10 48 0
 IsleStraight -10 56 0
 Wall -10 64 0
 IsleStraight -10 72 0
 
+// Section 2
 IsleStraight 10 40 0
 Wall 10 48 0
 IsleStraight 10 56 0
 Wall 10 64 0
 IsleStraight 10 72 0
 
-// Custom Wall
-IsleStraight 20 20 0
-Wall 20 12 0
-IsleStraight 20 4 0
-Wall 20 -4 0
+// Section 3
 IsleStraight 20 -12 0
+Wall 20 -4 0
+IsleStraight 20 4 0
+Wall 20 12 0
+IsleStraight 20 20 0
 
-// A pair of custom walls
+// Section 4
 IsleStraight 14 114 90
-IsleStraight 30 114 90
 Wall 22 114 90
+IsleStraight 30 114 90
+
+// Section 5
 IsleStraight 14 128 90
+Wall 22 128 90
 IsleStraight 30 128 90
+Wall 38 128 90
 IsleStraight 46 128 90
+
 Wall 46 122 0
 IsleStraight 46 114 0
-Wall 22 128 90
-Wall 38 128 90
-IsleStraight 46 98 0
 Wall 46 106 00
+IsleStraight 46 98 0
 
-// WALL AT X: -5
+// Section 6
 IsleStraight -5 -60 0
 Wall -5 -52 0
 IsleStraight -5 -44 0
 
-// WALL AT Z: -70
+// Section 7
 IsleStraight 45 -70 90
 Wall 37 -70 90
 IsleStraight 29 -70 90
 Wall 21 -70 90
 IsleStraight 13 -70 90
 
-// Checkpoints
-Checkpoint 0 0 0
-Checkpoint 10 120 90
-Checkpoint 25 56 0
-Checkpoint 40 -30 0
-
-// World
+// WORLD
 Skybox 0 0 0 -960
 Ground 0 0 0
 Racecar 0 -30 0
 Cube 1000 0 0 5
 
-// Waypoints / AI
+// WAYPOINTS / AI
 Dummy 0 25 0
 Dummy 0 55 0
 Dummy 0 85 0
@@ -74,9 +82,10 @@ Dummy 40 -30 0
 Dummy 40 -50 0
 Dummy 10 -50 0
 Dummy 0 -10 0
+
 Racecar 10 -30 0
 
-// Perimeter
+// TANKS
 TankSmall1 60 -80 0
 TankSmall2 -60 -80 0
 TankSmall2 60 180 0
@@ -84,9 +93,14 @@ TankSmall1 -60 180 0
 TankSmall1 60 60 0
 TankSmall2 -60 60 0
 
-// Obstacle
+// BURIED TANKS
 TankSmall2 35 -4 0 -5 0 -20
 
-//Grid 0 0 0 0.1
+/// OTHER SCENERY ///
+
 Tower 100 0 0 -4 0 0 5
 Barrel -30 0 0 0 90 0 0.1
+Barrel -60 100 0 0 90 0 0.1
+Barrel 0 180 0 0 90 0 0.1
+Barrel 100 30 0 0 90 0 0.1
+//Grid 0 0 0 0.1 0 0 10
