@@ -15,8 +15,9 @@
 using namespace tle;
 using namespace desert;
 
+RNG HoverAI::speedRNG = {HoverAI::kMinSpeedRng, HoverAI::kMaxSpeedRng};
 
-HoverAI::HoverAI(IModel* m, string tag) : DesertVehicle(m, DesertVehicle::VehicleType::AI)
+HoverAI::HoverAI(IModel* m, string tag) : DesertVehicle(m, DesertVehicle::VehicleType::AI), kUniqueSpeed(speedRNG.getDecimalPoint())
 {
 	mTag = tag;
 	mRadius = kCollisionRadius;
@@ -40,20 +41,20 @@ void HoverAI::follow(ISceneNode* destination)
 
 bool HoverAI::updateScene(const float kGameSpeed, const float kDeltaTime, const float distanceToPlayer, bool ahead)
 {
-	int rubberMultiplier = (ahead) ? 1 : -1;
-	float cappedDistance = distanceToPlayer * rubberMultiplier;
+	//int rubberMultiplier = (ahead) ? 1 : -1;
+	//float cappedDistance = distanceToPlayer * rubberMultiplier;
 
-	if (cappedDistance > kMaxRubberDistance)
-	{
-		cappedDistance = kMaxRubberDistance;
-	}
+	//if (cappedDistance > kMaxRubberDistance)
+	//{
+	//	cappedDistance = kMaxRubberDistance;
+	//}
 
-	if (cappedDistance < -kMaxRubberDistance)
-	{
-		cappedDistance = -kMaxRubberDistance;
-	}
+	//if (cappedDistance < -kMaxRubberDistance)
+	//{
+	//	cappedDistance = -kMaxRubberDistance;
+	//}
 
-	float rubberThrust = mThrust + (cappedDistance / kRubberDivider);
+	//SVector2D thrustVector = kThrustVector * (cappedDistance / kRubberDivider);
 
 	if (mInvTimer > 0)
 	{
@@ -67,11 +68,10 @@ bool HoverAI::updateScene(const float kGameSpeed, const float kDeltaTime, const 
 	// If car is after some target
 	if (currentTargetNode != nullptr)
 	{
-		float frameTiming = kGameSpeed * kDeltaTime;
 		node->LookAt(currentTargetNode);
 
 		// Update movement vector
-		movementThisFrame += getFacingVector2D() * rubberThrust * frameTiming;
+		movementThisFrame += getFacingVector2D() * (kThrustVector * kGameSpeed * kUniqueSpeed);
 		// Returns true if car has almost reached target
 		return ((position2D() - targetVector).length()) <= kWaypointArrivalDistance;
 	}
@@ -80,14 +80,14 @@ bool HoverAI::updateScene(const float kGameSpeed, const float kDeltaTime, const 
 
 void HoverAI::modifyMovementVector(SVector2D change)
 {
-	movementThisFrame += change;
+	movementThisFrame = change * kBounce;
 	mVectorModified = true;
 }
 
 void HoverAI::applyMovementVector(const float kDeltaTime)
 {
 	// Apply movement vector, drag
-	moveByVector(movementThisFrame);
+	moveByVector(movementThisFrame * kDeltaTime);
 	movementThisFrame *= kDrag;
 }
 

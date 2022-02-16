@@ -39,6 +39,8 @@ Collision::CollisionAxis DesertCheckpoint::collision(SVector2D position, const f
 
 	if (collisionA == Collision::CollisionAxis::Both || collisionB == Collision::CollisionAxis::Both)
 		return Collision::CollisionAxis::Both;
+	
+	return Collision::CollisionAxis::None;
 }
 
 bool DesertCheckpoint::checkpointCollision(SVector2D position)

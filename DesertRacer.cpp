@@ -29,6 +29,7 @@ using namespace desert;
 enum GameState
 {
 	Startup,
+	PreSelection,
 	Selection,
 	Playing,
 	Paused
@@ -43,7 +44,9 @@ void main()
 	const string trackFolder = mediaFolder + "\\tracks\\";
 	// Text file containing the names of models used and their initial position
 	vector<string> tracks { "DefaultTrack.txt", "SnowCircuit.txt", "DeathIsland.txt" };
-	
+	// Control keybinding selection
+	const SControlKeybinding controlKeybind = kDefaultDvorakBind.kControlKeybind;
+
 	GameState state = Startup;
 
 	// Create a 3D engine
@@ -82,11 +85,16 @@ void main()
 		{
 			if (startupScreen.setupFrame(myEngine, kGameSpeed, kDeltaTime))
 			{
-				state = Selection;
+				state = PreSelection;
 				// Clean up startup screen
 				startupScreen.remove(myEngine);
-				selectionScreen = new TrackSelection(myEngine, kDefaultMetaBind.kSelectTrack);
 			}
+		}
+		else if (state == PreSelection)
+		{
+			state = Selection;
+			selectionScreen = new TrackSelection(myEngine, kDefaultMetaBind.kSelectTrack);
+
 		}
 		else if (state == Selection)
 		{
@@ -95,7 +103,7 @@ void main()
 			{
 				state = Playing;
 				// Create racetrack scene
-				defaultTrack = new DesertRacetrack(myEngine, trackFolder + tracks.at(trackIndex));
+				defaultTrack = new DesertRacetrack(myEngine, trackFolder + tracks.at(trackIndex), controlKeybind);
 				selectionScreen->remove(myEngine);
 				myEngine->StartMouseCapture();
 			}
@@ -142,17 +150,22 @@ void main()
 
 		// Quit game
 		if (myEngine->KeyHit(kDefaultMetaBind.kQuitGame))
-		{
-			myEngine->Stop();
+		{	
+			myEngine->StopMouseCapture();
+
+			if (state == Playing)
+			{
+				defaultTrack->remove(myEngine);
+				delete defaultTrack;
+				defaultTrack = nullptr;
+				state = PreSelection;
+			}
+			else
+			{
+				myEngine->Stop();
+			}
 		}
 	}
-
-	// Free up memory
-	delete defaultTrack;
-	defaultTrack = nullptr;
-
-	// Not sure if this is even necessary tbh
-	myEngine->StopMouseCapture();
 
 	// Delete the 3D engine
 	myEngine->Delete();

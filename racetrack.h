@@ -41,10 +41,15 @@ namespace desert
         /**
         * @param myEngine Pointer to TL-Engine running instance
         * @param sceneSetupFilename File containing models / positioning
+        * @param controlKeybind Control keybind
         */
-        DesertRacetrack(tle::I3DEngine* myEngine, string sceneSetupFilename);
+        DesertRacetrack(tle::I3DEngine* myEngine, string sceneSetupFilename, SControlKeybinding controlKeybind);
         // Destroy racetrack, free memory
         ~DesertRacetrack();
+        
+        // Removes track from screen
+        void remove(tle::I3DEngine* myEngine);
+
         // Choose the correct object type for each model loaded
         void handleModel(tle::IModel* model, std::string type, NodeAlignment alignment);
         /**
@@ -117,13 +122,17 @@ namespace desert
         const tle::EKeyCode kFollowCamKey = tle::Key_1;
         const tle::EKeyCode kPovCamKey = tle::Key_2;
 
-        const int kSetupXIndex = 1;
-        const int kSetupZIndex = 2;
-        const int kSetupYRotIndex = 3;
-        const int kSetupYIndex = 4;
-        const int kSetupXRotIndex = 5;
-        const int kSetupZRotIndex = 6;
-        const int kSetupScaleIndex = 7;
+
+        enum Setup
+        {
+            XIndex = 1,
+            ZIndex = 2,
+            YRotIndex = 3,
+            YIndex = 4,
+            XRotIndex = 5,
+            ZRotIndex = 6,
+            ScaleIndex = 7
+        };
 
         const std::string barrelModel = "Barrel";
         const std::string dummyThiccModel = "Dummy";
@@ -134,10 +143,10 @@ namespace desert
         std::unordered_map<std::string, float> kCustomCollisionRadius
         {
             { "Snowman", 8.0f },
-            { "Moon", 180.0f },
-            { "Barrel", 6.0f },
-            { "TankSmall1", 3.0f },
-            { "TankSmall2", 3.0f }
+            { "Moon", 173.0f },
+            { "Barrel", 2.4f },
+            { "TankSmall1", 1.8f },
+            { "TankSmall2", 1.8f }
         };
 
         std::vector<std::string> racecarSkins

@@ -102,17 +102,15 @@ float HoverCar::processBoost(tle::I3DEngine* myEngine, const float kDeltaTime)
 	return boostMultiplier;
 }
 
-void HoverCar::processThrust(tle::I3DEngine* myEngine, const float frameSpeed, const float boostMultiplier)
+void HoverCar::processThrust(tle::I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime, const float boostMultiplier)
 {
 	// Move Forwards / Backwards
 	if (myEngine->KeyHeld(mKeybind.kForwardThrust))
 	{
-		movementThisFrame += getFacingVector2D() * (kThrustVector * frameSpeed * boostMultiplier);
-		//cout << getFacingVector2D().asString() << endl;
-		//cout << getFacingVector().asString() << endl;
+		movementThisFrame += getFacingVector2D() * (kThrustVector * kGameSpeed * boostMultiplier);
 		carState = Moving;
 
-		float currentLiftSpeed = (kRearLiftSpeed * frameSpeed);
+		float currentLiftSpeed = (kRearLiftSpeed * kGameSpeed * kDeltaTime);
 
 		if (rearLift + currentLiftSpeed < kMaxRearLift)
 		{
@@ -122,7 +120,7 @@ void HoverCar::processThrust(tle::I3DEngine* myEngine, const float frameSpeed, c
 	}
 	else if (myEngine->KeyHeld(mKeybind.kBackwardsThrust))
 	{
-		movementThisFrame += getFacingVector2D() * (kThrustVector * frameSpeed * kBackwardThrustMultiplier * boostMultiplier);
+		movementThisFrame += getFacingVector2D() * (kThrustVector * kGameSpeed * kBackwardThrustMultiplier * boostMultiplier);
 		//node->MoveLocalZ(-kThrust * kBackwardThrustMultiplier * frameGameSpeed);
 		carState = Moving;
 	}
@@ -236,10 +234,12 @@ void HoverCar::control(I3DEngine* myEngine, const float kGameSpeed, const float 
 	int turnMultiplier = processTurn(myEngine, frameSpeed);
 	float boostMultiplier = processBoost(myEngine, kDeltaTime);
 
-	processThrust(myEngine, frameSpeed, boostMultiplier);
+	processThrust(myEngine, kGameSpeed, kDeltaTime, boostMultiplier);
 	processBobble(kGameSpeed, kDeltaTime);
 	processLean(frameSpeed, turnMultiplier);
 	controlCameras(myEngine, kGameSpeed, kDeltaTime);
+
+	damageTimer += kDeltaTime;
 }
 
 void HoverCar::controlCameras(I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime)
@@ -263,11 +263,15 @@ void HoverCar::controlCameras(I3DEngine* myEngine, const float kGameSpeed, const
 
 void HoverCar::reduceHealth(const int reduction)
 {
-	health -= reduction;
-
-	if (health < kHealthSteerNerf)
+	if (damageTimer > kDamageBuffer)
 	{
-		rotationSpeed = kNerfedRotation;
+		health -= reduction;
+		damageTimer = 0;
+
+		if (health < kHealthSteerNerf)
+		{
+			rotationSpeed = kNerfedRotation;
+		}
 	}
 }
 
@@ -336,6 +340,10 @@ int HoverCar::getHealth() const
 float HoverCar::getSpeed() const
 {
 	SVector2D scaledVector = movementThisFrame;
-	cout << scaledVector.length() << endl;
 	return scaledVector.length() * kWorldScale;
+}
+
+bool HoverCar::speedOverCollisionThreshold() const
+{
+	return getSpeed() > kCollisionSpeedThreshold;
 }

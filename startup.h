@@ -98,7 +98,7 @@ namespace desert
         float timeElapsed = 0.0f;
 
         // Frame after which the screen is considered over
-        const int kScreenDuration = 12;
+        const int kScreenDuration = 5;
 
         int currentFrame = 0;
 

@@ -29,11 +29,8 @@ using namespace desert;
 
 
 // Set up scene and create objects
-DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
+DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename, SControlKeybinding controlKeybind)
 {
-	// Choose keybinds
-	const SControlKeybinding controlKeybind = kDefaultQwertyBind.kControlKeybind;
-
 	// Get setup file lines
 	vector<string> setupLines = Files::getLinesFromFile(sceneSetupFilename);
 
@@ -52,29 +49,31 @@ DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 	for (string setupLine : setupLines)
 	{
 		vector<string> setupElements = Files::splitLine(setupLine);
-		const string meshFilename = setupElements[0];
+		const string meshFilename = setupElements.at(0);
 		float initialY = kDefaultY, xRotation = 0, zRotation = 0, scale = 1;
 
-		const float initialX = stof(setupElements[kSetupXIndex]), initialZ = stof(setupElements[kSetupZIndex]), yRotation = stof(setupElements[kSetupYRotIndex]);
+		const float initialX = stof(setupElements.at(XIndex));
+		const float initialZ = stof(setupElements.at(ZIndex));
+		const float yRotation = stof(setupElements.at(YRotIndex));
 
-		if (setupElements.size() > kSetupYIndex)
+		if (setupElements.size() > YIndex)
 		{
-			initialY = stof(setupElements[kSetupYIndex]);
+			initialY = stof(setupElements.at(YIndex));
 		}
 
-		if (setupElements.size() > kSetupXRotIndex)
+		if (setupElements.size() > XRotIndex)
 		{
-			xRotation = stof(setupElements[kSetupXRotIndex]);
+			xRotation = stof(setupElements.at(XRotIndex));
 		}
 
-		if (setupElements.size() > kSetupZRotIndex)
+		if (setupElements.size() > ZRotIndex)
 		{
-			zRotation = stof(setupElements[kSetupZRotIndex]);
+			zRotation = stof(setupElements.at(ZRotIndex));
 		}
 
-		if (setupElements.size() > kSetupScaleIndex)
+		if (setupElements.size() > ScaleIndex)
 		{
-			scale = stof(setupElements[kSetupScaleIndex]);
+			scale = stof(setupElements.at(ScaleIndex));
 		}
 
 		cout << "Loading model of " << meshFilename << endl;
@@ -94,7 +93,7 @@ DesertRacetrack::DesertRacetrack(I3DEngine* myEngine, string sceneSetupFilename)
 		model->Scale(scale);
 
 		// Detect model axis alignment
-		NodeAlignment alignment = SceneNodeContainer::getAlignmentFromRotation(yRotation);
+		const NodeAlignment alignment = SceneNodeContainer::getAlignmentFromRotation(yRotation);
 
 		if (!playerLoaded && meshFilename == "Racecar")
 		{
@@ -154,8 +153,18 @@ DesertRacetrack::~DesertRacetrack()
 		delete pSystem;
 		pSystem = nullptr;
 	}
+}
 
-	cout << "Racetrack destroyed" << endl;
+void DesertRacetrack::remove(I3DEngine* myEngine)
+{
+	for (auto& it : mMeshes) {
+		myEngine->RemoveMesh(it.second);
+	}
+
+	myEngine->RemoveMesh(crossMesh);
+	myEngine->RemoveMesh(flareMesh);
+	
+	uiPtr->remove(myEngine);
 }
 
 void DesertRacetrack::handleModel(IModel* model, string type, NodeAlignment alignment)
@@ -385,10 +394,8 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 		// If AI has reached its current target
 		if (hoverAI->updateScene(kGameSpeed, kDeltaTime, racecarPtr->distanceTo(hoverAI->position2D()), ahead))
 		{
-			cout << "Reached waypoint" << endl;
  			// Calculate next waypoint
 			unsigned int nextWaypointI = hoverAI->getWaypointIndex();
-			cout << nextWaypointI << endl;
 			if (mWaypoints.size() > nextWaypointI)
 			{
 				// Set AI's next target
@@ -439,7 +446,7 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 
 			if (!node->isFixed())
 			{
-				node->modifyMovementVector(racecarPtr->getMovementVector() * kDeltaTime);
+				node->modifyMovementVector(racecarPtr->getMovementVector());
 			}
 		}
 
@@ -456,20 +463,26 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 	* Now, handle collision effects
 	*/
 	// Only count damages if non contiguous
-	if (carHasCollided && !carCollidedLastFrame)
+
+	if (carHasCollided)
 	{
+		// Threshold
+		if (racecarPtr->speedOverCollisionThreshold() && !carCollidedLastFrame) {
+			// Reduce health, update UI
+			racecarPtr->reduceHealth();
+			updateHealthInUI();
+
+			// If car has no more health, stop race
+			if (!racecarPtr->getHealth())
+			{
+				raceState = Over;
+				uiPtr->displayText("Your car is done for :(", false, 0, "Press R to Restart :)");
+			}
+		}
+
+		
 		// Cancel vector out
 		racecarPtr->bounce(reverseAxis);
-		// Reduce health, update UI
-		racecarPtr->reduceHealth();
-		updateHealthInUI();
-
-		// If car has no more health, stop race
-		if (!racecarPtr->getHealth())
-		{
-			raceState = Over;
-			uiPtr->displayText("Your car is done for :(", false, 0, "Press R to Restart :)");
-		}
 	}
 
 	// After possibly cancelling movement vector out, apply result
@@ -486,7 +499,7 @@ void DesertRacetrack::updateOngoingRaceScene(I3DEngine* myEngine, const float kG
 		}
 
 		// Apply movement vector result
-		hoverAI->applyMovementVector();
+		hoverAI->applyMovementVector(kDeltaTime);
 		hoverAI->resetCollided();
 	}
 
@@ -557,7 +570,7 @@ void DesertRacetrack::updateUI()
 	// Then by racecar speed
 	float speedInKm = (racecarPtr->getSpeed() / kMetersInKm);
 	//cout << speedInKm << endl;
-	const int kmPerH = kSecsInAnHour * speedInKm;
+	const int kmPerH = static_cast<int>(kSecsInAnHour * speedInKm);
 
 	// Update speed
 	uiPtr->setSpeedText(to_string(kmPerH) + "km/h");

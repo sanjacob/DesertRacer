@@ -18,6 +18,7 @@
 #include "vector.h"
 #include "node.h"
 #include "vehicle.h"
+#include "rng.h"
 
 
 namespace desert {
@@ -64,19 +65,24 @@ namespace desert {
 		bool hasCollided() const;
 		void reset();
 		void resetWaypoint();
-	private:
+	protected:
+		static constexpr int kMinSpeedRng = 80;
+		static constexpr int kMaxSpeedRng = 100;
+		static RNG speedRNG;
 		const float kWaypointArrivalDistance = 4.0f;
 		const float kCollisionRadius = 3.0f;
 		// Bounce multiplier
-		const float kBounce = 1.1f;
-		const float kDrag = 0.87;
+		const float kBounce = 4.5f;
+		const float kDrag = 0.92;
 		// Much less health than players have
 		const int kInitialHealth = 20;
 		const int kSpeedHealthNerf = 10;
 
 		SVector2D targetVector, facingVector;
-		const float kInitialThrust = 7.0f;
-		const float kNerfedThrust = 4.5f;
+		const SVector2D kThrustVector = { 8.0f, 8.0f };
+
+		const float kInitialThrust = 1.0f;
+		const float kNerfedThrust = 0.5f;
 		float mThrust = kInitialThrust;
 		unsigned int waypointIndex = 0;
 		int mHealth = kInitialHealth;
@@ -86,7 +92,7 @@ namespace desert {
 
 		const float kInvTime = 5;
 		float mInvTimer = 0;
-
+		const float kUniqueSpeed;
 
 		tle::ISceneNode* currentTargetNode = nullptr;
 	};

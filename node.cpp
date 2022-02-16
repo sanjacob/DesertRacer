@@ -117,9 +117,10 @@ void SceneNodeContainer::rotateLocallyByVector(SVector2D vector)
 
 const int SceneNodeContainer::kAxisDegrees = 180;
 
-NodeAlignment SceneNodeContainer::getAlignmentFromRotation(int rotation)
+NodeAlignment SceneNodeContainer::getAlignmentFromRotation(const float rotation)
 {
-	switch (rotation % kAxisDegrees)
+	int rotationInteger = static_cast<int>(rotation);
+	switch (rotationInteger % kAxisDegrees)
 	{
 	case 0:
 		return xAligned;

@@ -30,7 +30,7 @@ namespace desert
 	class SceneNodeContainer
 	{
 	public:
-		static NodeAlignment getAlignmentFromRotation(int rotation);
+		static NodeAlignment getAlignmentFromRotation(float rotation);
 		/**
 		* @param sceneNode A TL-Engine ISceneNode pointer
 		*/
@@ -116,7 +116,7 @@ namespace desert
 		virtual Collision::CollisionAxis collision(SphereCollisionModel other);
 		virtual int getCollisionRadius();
 	protected:
-		int mRadius;
+		float mRadius;
 	};
 
 	class BoxCollisionModel : public CollisionModel

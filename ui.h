@@ -79,6 +79,7 @@ namespace desert
         * @param hAlign Vertical alignment
         */
         DesertSprite(tle::ISprite* s, int windowW, int windowH, int w, int h, ESpriteHAlignment wAlign = HCentre, ESpriteVAlignment hAlign = VCentre);
+        void remove(tle::I3DEngine* myEngine);
         // Toggle visibility of sprite (it is moved outside the window)
         void toggle(bool show);
         /**
@@ -129,6 +130,8 @@ namespace desert
         GameUI(tle::I3DEngine* myEngine);
         // UI destructor
         GameUI::~GameUI();
+        void remove(tle::I3DEngine* myEngine);
+
         /**
         * @param text Text to appear in the main dialog
         * @param goal If true the goal backdrop will be used

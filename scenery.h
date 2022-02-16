@@ -23,7 +23,7 @@ namespace desert {
 		~DesertWall();
 		static const std::string kDefaultModelName;
 	protected:
-		const int kHalfWidth = 2.0f, kHalfLength = 8.5f;
+		const float kHalfWidth = 2.0f, kHalfLength = 8.5f;
 	};
 
 	class DesertTower : public BoxCollisionModel
@@ -33,7 +33,7 @@ namespace desert {
 		~DesertTower();
 		static const std::string kDefaultModelName;
 	protected:
-		const int kHalfWidth = 8.0f, kHalfLength = 8.0f;
+		const float kHalfWidth = 8.0f, kHalfLength = 8.0f;
 	};
 
 	class CustomSphereCModel : public SphereCollisionModel

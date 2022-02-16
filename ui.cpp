@@ -51,7 +51,10 @@ DesertSprite::DesertSprite(ISprite* s, int windowW, int windowH, int w, int h, E
 	y = s->GetY() + (h / 2);
 }
 
-
+void DesertSprite::remove(tle::I3DEngine* myEngine)
+{
+	myEngine->RemoveSprite(mSprite);
+}
 
 void DesertSprite::toggle(bool show)
 {
@@ -172,6 +175,20 @@ GameUI::~GameUI()
 
 	mTuxSprite = mGoalSprite = mLapSprite = mSpeedSprite = mPlaceSprite = mBoostSprite = mWarnSprite = mOverheatSprite = mSummarySprite = nullptr;
 }
+
+void GameUI::remove(I3DEngine* myEngine)
+{
+	mTuxSprite->remove(myEngine);
+	mGoalSprite->remove(myEngine);
+	mLapSprite->remove(myEngine);
+	mSpeedSprite->remove(myEngine);
+	mPlaceSprite->remove(myEngine);
+	mBoostSprite->remove(myEngine);
+	mWarnSprite->remove(myEngine);
+	mOverheatSprite->remove(myEngine);
+	mSummarySprite->remove(myEngine);
+}
+
 
 void GameUI::setRacePosition(int position)
 {

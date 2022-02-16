@@ -25,7 +25,7 @@ namespace desert
     class HoverCar : public DesertVehicle
     {
     public:
-        static enum BoostState
+        enum BoostState
         {
             Inactive,
             Active,
@@ -40,7 +40,7 @@ namespace desert
         void addCamera(DesertCamera cam);
         void control(tle::I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime);
         float processBoost(tle::I3DEngine* myEngine, const float kDeltaTime);
-        void processThrust(tle::I3DEngine* myEngine, const float frameSpeed, const float boostMultiplier);
+        void processThrust(tle::I3DEngine* myEngine, const float kGameSpeed, const float kDeltaTime, const float boostMultiplier);
         int processTurn(tle::I3DEngine* myEngine, const float frameSpeed);
         void processLean(const float frameSpeed, const int turnMultiplier);
         void processBobble(const float kGameSpeed, const float kDeltaTime);
@@ -57,6 +57,7 @@ namespace desert
         const float getCollisionRadius() const;
         int getHealth() const;
         float getSpeed() const;
+        bool speedOverCollisionThreshold() const;
     protected:
         // Car forwards / backwards movement state
         enum HoverCarState
@@ -78,11 +79,11 @@ namespace desert
         // MOVEMENT //
 
         // Thrust speed
-        const SVector2D kThrustVector = { 140.0f, 140.0f };
+        const SVector2D kThrustVector = { 8.0f, 8.0f };
         // Multiplier when using backwards thrust
         const float kBackwardThrustMultiplier = -0.5;
         // Rotation speed
-        const float kInitialRotation = 200.0f;
+        const float kInitialRotation = 250.0f;
 
         // Movement vector is multiplied by drag every frame
         const float kDrag = 0.92f;
@@ -140,6 +141,9 @@ namespace desert
         const float kNerfedRotation = 70.0f;
         // Health at which rotation nerf will take effect
         const int kHealthSteerNerf = 40;
+        const float kCollisionSpeedThreshold = 30.0f;
+        // Don't take damage if within this time of last damage
+        const float kDamageBuffer = 0.1f;
 
 
         // Collision radius
@@ -157,6 +161,7 @@ namespace desert
         float timeElapsedMoving = 0.0f;
         float rotationSpeed = kInitialRotation;
         float boostTimer = 0.0f, boostPenaltyTimer = 0.0f;
+        float damageTimer = 0;
         float boostDragMultiplier = 1;
         float rearLift = 0.0f;
         float lean = 0.0f;
