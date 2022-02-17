@@ -1,40 +1,41 @@
 # Desert Racer
 
-### \#NotAnotherMarioKartClone
+Third Game for the *Games Concepts* module of first year of BSc Software Engineering at [UCLan][uclan].
 
-Third Game for the *Games Concepts* module of first year of BSc Software Engineering at UCLan.
-
-
-
-![](media/tux.jpg)
+![](images/game.png)
 *image not representative of actual gameplay*
 
 
 
 ## About
 
-Made with the help of [TL-Engine](http://www.gamesnorthwest.net/resources/tl_engine/index.html).
+Made with the "help" of [TL-Engine][tlengine].
+
+TL-Engine's license is unknown.
 
 
 
 ## Authorship
 
-Jacob Sanchez Perez (G20812080) \<jsanchez-perez@uclan.ac.uk>
+Jacob Sanchez Perez \<jsanchez-perez@uclan.ac.uk>
+
+Not particularly proud of this one.
 
 
 
 ## License
 
-[![License: GPL  v2][license-badge]][gnu]
-
-
-This software is distributed under the [General Public License v2.0][license], more information available at the [Free Software Foundation][gnu].
+![MIT License][license-badge]
+This software is distributed under the [MIT License][license].
 
 
 
-[license]: LICENSE "General Public License"
-[gnu]: https://www.gnu.org/licenses/old-licenses/gpl-2.0.html "Free Software Foundation"
-[license-badge]: https://img.shields.io/badge/License-GPL%20v2-blue.svg
+[uclan]: https://uclan.ac.uk
+
+[license]: LICENSE "MIT License"
+
+[license-badge]: https://img.shields.io/github/license/jacobszpz/DesertRacer
+[tlengine]: https://www.mantasbuzelis.dev/resources/tl_engine/downloads.html
 
  
 
