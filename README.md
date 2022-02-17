@@ -25,9 +25,10 @@ Not particularly proud of this one.
 
 ## License
 
-![MIT License][license-badge]
-This software is distributed under the [MIT License][license].
+[![MIT License][license-badge]][license]
 
+
+This software is distributed under the [MIT License][license].
 
 
 [uclan]: https://uclan.ac.uk
